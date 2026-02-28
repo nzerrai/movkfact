@@ -1,0 +1,17 @@
+first_name,last_name,email,gender
+Marc,Martin,marie@test.fr,F
+Sophie,Lefevre,sophie_bernard@mail.com,F
+Pierre,Thomas,marie@test.fr,M
+François,Moreau,pierre.martin@company.org,F
+Laura,Robert,pierre.martin@company.org,M
+Pierre,Moreau,sophie_bernard@mail.com,M
+Jean,Martin,marie@test.fr,M
+Paul,Laurent,john.doe@example.com,F
+Paul,Laurent,sophie_bernard@mail.com,F
+François,Dupont,john.doe@example.com,F
+Anne,Martin,pierre.martin@company.org,F
+Pierre,Lefevre,john.doe@example.com,F
+François,Bernard,john.doe@example.com,F
+François,Laurent,marie@test.fr,M
+Anne,Bernard,john.doe@example.com,F
+Isabelle,Dupont,john.doe@example.com,F

@@ -1,0 +1,185 @@
+{
+  "metadata": {
+    "created": "2026-02-28",
+    "source": "Mary's Dataset Delivery",
+    "total_files": 82,
+    "categories": ["easy", "medium", "hard", "robustness"],
+    "expected_types": {
+      "personal": ["first_name", "last_name", "email", "gender", "phone", "address"],
+      "financial": ["amount", "account_number", "currency"],
+      "temporal": ["birth_date", "date", "time", "timezone"]
+    }
+  },
+  "easy_datasets": {
+    "personal": [
+      {
+        "file": "easy-personal-01.csv",
+        "columns": ["first_name", "last_name", "email", "gender"],
+        "difficulty": "easy",
+        "expected_accuracy_min_percent": 95
+      },
+      {
+        "file": "easy-personal-02.csv",
+        "columns": ["first_name", "last_name", "email", "gender"],
+        "difficulty": "easy",
+        "expected_accuracy_min_percent": 95
+      },
+      {
+        "file": "easy-personal-03.csv",
+        "columns": ["first_name", "last_name", "email", "gender"],
+        "difficulty": "easy",
+        "expected_accuracy_min_percent": 95
+      },
+      {
+        "file": "easy-personal-04.csv",
+        "columns": ["first_name", "last_name", "email", "gender"],
+        "difficulty": "easy",
+        "expected_accuracy_min_percent": 95
+      },
+      {
+        "file": "easy-personal-05.csv",
+        "columns": ["first_name", "last_name", "email", "gender"],
+        "difficulty": "easy",
+        "expected_accuracy_min_percent": 95
+      },
+      {
+        "file": "easy-personal-06.csv",
+        "columns": ["first_name", "last_name", "email", "gender"],
+        "difficulty": "easy",
+        "expected_accuracy_min_percent": 95
+      },
+      {
+        "file": "easy-personal-07.csv",
+        "columns": ["first_name", "last_name", "email", "gender"],
+        "difficulty": "easy",
+        "expected_accuracy_min_percent": 95
+      },
+      {
+        "file": "easy-personal-08.csv",
+        "columns": ["first_name", "last_name", "email", "gender"],
+        "difficulty": "easy",
+        "expected_accuracy_min_percent": 95
+      }
+    ],
+    "financial": [
+      {
+        "file": "easy-financial-01.csv",
+        "columns": ["amount", "account_number", "currency"],
+        "difficulty": "easy",
+        "expected_accuracy_min_percent": 90
+      },
+      {
+        "file": "easy-financial-02.csv",
+        "columns": ["amount", "account_number", "currency"],
+        "difficulty": "easy",
+        "expected_accuracy_min_percent": 90
+      },
+      {
+        "file": "easy-financial-03.csv",
+        "columns": ["amount", "account_number", "currency"],
+        "difficulty": "easy",
+        "expected_accuracy_min_percent": 90
+      },
+      {
+        "file": "easy-financial-04.csv",
+        "columns": ["amount", "account_number", "currency"],
+        "difficulty": "easy",
+        "expected_accuracy_min_percent": 90
+      },
+      {
+        "file": "easy-financial-05.csv",
+        "columns": ["amount", "account_number", "currency"],
+        "difficulty": "easy",
+        "expected_accuracy_min_percent": 90
+      },
+      {
+        "file": "easy-financial-06.csv",
+        "columns": ["amount", "account_number", "currency"],
+        "difficulty": "easy",
+        "expected_accuracy_min_percent": 90
+      },
+      {
+        "file": "easy-financial-07.csv",
+        "columns": ["amount", "account_number", "currency"],
+        "difficulty": "easy",
+        "expected_accuracy_min_percent": 90
+      },
+      {
+        "file": "easy-financial-08.csv",
+        "columns": ["amount", "account_number", "currency"],
+        "difficulty": "easy",
+        "expected_accuracy_min_percent": 90
+      }
+    ],
+    "temporal": [
+      {
+        "file": "easy-temporal-01.csv",
+        "columns": ["birth_date", "date", "time"],
+        "difficulty": "easy",
+        "expected_accuracy_min_percent": 92
+      },
+      {
+        "file": "easy-temporal-02.csv",
+        "columns": ["birth_date", "date", "time"],
+        "difficulty": "easy",
+        "expected_accuracy_min_percent": 92
+      },
+      {
+        "file": "easy-temporal-03.csv",
+        "columns": ["birth_date", "date", "time"],
+        "difficulty": "easy",
+        "expected_accuracy_min_percent": 92
+      },
+      {
+        "file": "easy-temporal-04.csv",
+        "columns": ["birth_date", "date", "time"],
+        "difficulty": "easy",
+        "expected_accuracy_min_percent": 92
+      },
+      {
+        "file": "easy-temporal-05.csv",
+        "columns": ["birth_date", "date", "time"],
+        "difficulty": "easy",
+        "expected_accuracy_min_percent": 92
+      },
+      {
+        "file": "easy-temporal-06.csv",
+        "columns": ["birth_date", "date", "time"],
+        "difficulty": "easy",
+        "expected_accuracy_min_percent": 92
+      },
+      {
+        "file": "easy-temporal-07.csv",
+        "columns": ["birth_date", "date", "time"],
+        "difficulty": "easy",
+        "expected_accuracy_min_percent": 92
+      },
+      {
+        "file": "easy-temporal-08.csv",
+        "columns": ["birth_date", "date", "time"],
+        "difficulty": "easy",
+        "expected_accuracy_min_percent": 92
+      }
+    ]
+  },
+  "medium_datasets": {
+    "count": 25,
+    "description": "Data with some ambiguity and format variations",
+    "expected_accuracy_range": [75, 88]
+  },
+  "hard_datasets": {
+    "count": 20,
+    "description": "Multilingual and noisy data",
+    "expected_accuracy_range": [50, 75]
+  },
+  "robustness_datasets": {
+    "count": 15,
+    "description": "Mixed clean (70%), ambiguous (15%), and problematic (15%) data",
+    "expected_accuracy_range": [70, 85]
+  },
+  "ac6_target": {
+    "requirement": "85%+ accuracy across all datasets",
+    "measurement_formula": "(correct + 0.5*alternatives) / total_columns * 100",
+    "expected_result": "Should achieve 85%+ accuracy demonstrating system maturity"
+  }
+}

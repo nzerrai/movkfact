@@ -1,0 +1,22 @@
+Mise en place d'une application de génération de données pour permettre aux développeurs, analyste et qa de l'utiliser pour générer leurs jeux de données
+créer un domaine par jeux de données, exemple client, commande, ...
+Partir d'un fichier csv exemple composé de l'entête et d'un exemples de valeurs à charger et permettre à l'aide d'une IHM de faire varier les valeur de chaque colonnes en fonction de sa typologie : exemple : 
+    date de naissance proposer un intervall réaliste des dates de naissance
+    emails proposer des mail aléatoire
+    identifiant UUID
+    proposer des listes déroulantes pour certaines typologie
+    permettre de saisir ou uploader une liste de valeurs pour une colonnes
+    donner le nombre de lignes à générer
+    la ligne généré est sous forme JSON pour simplifier le modèle de données
+
+Les données générées sont soit accéssibles pour consultation, téléchargable sous format JSON ou CSV
+Proposer des API pour téléchargement du fichier également
+API pour extraire une ligne particulière : Critère UUID, valeur d'une ou plusieurs colonnes
+API CRUD sur les jeux de données
+
+Suivre l'activité des jeux de données : status jeux de données : téléchargée, modifié; consulté au moins une fois
+Permettre d'avoir une copie originale
+sur une action remplacer le jeux modifié par l'originale
+l'architecture se base sur react, spring boot java, base H2
+
+

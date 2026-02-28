@@ -1,0 +1,38 @@
+spring:
+  # PostgreSQL configuration for production (uncomment when ready)
+  datasource:
+    # url: jdbc:postgresql://localhost:5432/movkfactdb
+    # driver-class-name: org.postgresql.Driver
+    # username: movkfact_user
+    # password: ${DB_PASSWORD}
+    url: jdbc:h2:mem:movkfactdb  # Fallback to H2 if not configured
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+    
+  jpa:
+    # database-platform: org.hibernate.dialect.PostgreSQL10Dialect
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    
+  h2:
+    console:
+      enabled: false  # Disable H2 console in production
+
+# JWT Configuration
+jwt:
+  secret: ${JWT_SECRET:change-me-to-secure-key-in-production}
+
+# Server Configuration
+server:
+  port: 8080
+  servlet:
+    context-path: /
+    
+# Logging
+logging:
+  level:
+    root: WARN
+    com.movkfact: INFO

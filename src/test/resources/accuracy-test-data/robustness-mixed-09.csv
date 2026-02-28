@@ -1,0 +1,21 @@
+id,first_name,email,amount,date,phone,country
+0,François,pierre.martin@company.org,"€1.234,56",2020-01-01,06-12-34-56-78,Allemagne
+1,François,invalid,"€1.234,56",10/11/2020,555.123.4567,France
+2,Marc,marie@test.fr,"50,00€",15/06/2019,06-12-34-56-78,Italia
+3,Marie,invalid,"€1.234,56",01.01.2020,+1-555-123-4567,Italia
+4,Marc,pierre.martin@company.org,15000,25/03/2022,06 12 34 56 78,France
+5,Björn,john.doe@example.com,"50,00€",2020-01-01,N/A,Royaume-Uni
+6,Jean,john.doe@example.com,1000.50,01-01-2020,N/A,Royaume-Uni
+7,Sophie,sophie_bernard@mail.com,"50,00€",01-01-2020,N/A,España
+8,Anne,sophie_bernard@mail.com,15000,10/11/2020,06-12-34-56-78,Allemagne
+9,Isabelle,sophie_bernard@mail.com,15000,10/11/2020,+1-555-123-4567,Royaume-Uni
+10,Marie,pierre.martin@company.org,"$9,999.99",01.01.2020,N/A,Italia
+11,Pierre,sophie_bernard@mail.com,15000,01 janvier 2020,555.123.4567,España
+12,François,marie@test.fr,1000.50,31/12/2021,06-12-34-56-78,Royaume-Uni
+13,Pierre,sophie_bernard@mail.com,"$9,999.99",2020-01-01,06 12 34 56 78,Italia
+14,Laura,pierre.martin@company.org,"€1.234,56",10/11/2020,555.123.4567,Allemagne
+15,Pierre,invalid,1000.50,10/11/2020,06-12-34-56-78,Royaume-Uni
+16,Αλέξανδρος,invalid,15000,2020-01-01,06 12 34 56 78,Royaume-Uni
+17,Sophie,invalid,1000.50,15/06/2019,555.123.4567,España
+18,Jean,marie@test.fr,1000.50,01 janvier 2020,N/A,Royaume-Uni
+19,李明,john.doe@example.com,1000.50,31/12/2021,555.123.4567,Allemagne

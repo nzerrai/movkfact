@@ -1,0 +1,22 @@
+id,first_name,email,amount,date,phone,country
+0,Sophie,marie@test.fr,"$9,999.99",15/06/2019,06-12-34-56-78,Royaume-Uni
+1,Paul,pierre.martin@company.org,15000,31/12/2021,+33612345678,Italia
+2,Marie,sophie_bernard@mail.com,"€1.234,56",25/03/2022,N/A,Royaume-Uni
+3,José,sophie_bernard@mail.com,"€1.234,56",01/01/2020,N/A,Allemagne
+4,Jean,marie@test.fr,"$9,999.99",25/03/2022,555.123.4567,Allemagne
+5,محمد,pierre.martin@company.org,"$9,999.99",15/06/2019,06-12-34-56-78,France
+6,François,marie@test.fr,"€1.234,56",01/1/2020,+33612345678,Italia
+7,Anne,invalid,"€1.234,56",31/12/2021,06-12-34-56-78,Royaume-Uni
+8,Paul,sophie_bernard@mail.com,15000,01-01-2020,06 12 34 56 78,Italia
+9,Anne,marie@test.fr,"€1.234,56",31/12/2021,N/A,France
+10,Pierre,sophie_bernard@mail.com,"$9,999.99",31/12/2021,N/A,Royaume-Uni
+11,Laura,marie@test.fr,"$9,999.99",10/11/2020,555.123.4567,España
+12,François,sophie_bernard@mail.com,"50,00€",15/06/2019,06-12-34-56-78,Italia
+13,Jean,pierre.martin@company.org,1000.50,01/01/2020,N/A,Italia
+14,Marc,john.doe@example.com,15000,01/01/2020,+33612345678,Italia
+15,Marc,pierre.martin@company.org,15000,25/03/2022,555.123.4567,Italia
+16,Paul,pierre.martin@company.org,"€1.234,56",01/1/2020,06-12-34-56-78,España
+17,Séan,john.doe@example.com,"€1.234,56",10/11/2020,N/A,Royaume-Uni
+18,José-María,invalid,"€1.234,56",01/1/2020,+1-555-123-4567,France
+19,Laura,invalid,15000,25/03/2022,06 12 34 56 78,España
+20,Sophie,john.doe@example.com,"€1.234,56",31/12/2021,06 12 34 56 78,Royaume-Uni

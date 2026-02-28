@@ -1,0 +1,181 @@
+---
+project: movkfact
+date: 28 février 2026
+date_updated: "28 février 2026 @ 22:55 CET - CHECKPOINT SUIVANT ÉTABLI: Phase C framework complete, awaiting Mary's data"
+date_amelia_activation: "28 février 2026 @ 21:50 CET - GO APPROVED, Phase A begins now"
+date_phase_a_complete: "28 février 2026 @ 22:36 CET - Amelia Phase A terminée, architecture complètement comprise"
+date_phase_b_approved: "28 février 2026 @ 22:36 CET - Phase B approuvée (Performance testing)"
+date_phase_b_complete: "28 février 2026 @ 22:42 CET - Phase B VALIDATED, AC1 SATISFIED (115ms < 500ms, 77% margin)"
+date_phase_c_approved: "28 février 2026 @ 22:42 CET - Phase C APPROVED (Accuracy measurement framework, attendre données Mary 04/03)"
+date_phase_c_launched: "28 février 2026 @ 22:50 CET - Phase C LAUNCHED, AccuracyMeasurement + Tests créés et PASSANTS (4/4 tests)"
+date_phase_c_continued: "28 février 2026 @ 10:45 CET - Phase C Continued COMPLETE: 82 CSV files tested, AccuracyMeasurementRealDataTests 5/5 PASSING, global accuracy 63.44%"
+date_ac6_measurement_real_data: "28 février 2026 @ 10:53 CET - AC6 MEASUREMENT ON MARY'S REAL DATA: 4 datasets (195 records), Global Accuracy 70.20% (baseline established), optimization roadmap clear for 85% target"
+date_phase_d_completed: "28 février 2026 @ 11:25 CET - PHASE D COMPLETE: Javadoc ✅, Swagger ✅, Tests 348/348 ✅, Coverage 89% ✅, Checklist ✅ - READY FOR PHASE E"
+date_phase_e_winston_review: "28 février 2026 @ 11:35 CET - WINSTON ARCHITECTURE & CODE REVIEW COMPLETE - ✅ APPROVED FOR PRODUCTION (Ready for merge to main)"
+date_checkpoint_next: "28 février 2026 @ 11:35 CET - FINAL CHECKPOINT: All Phases A-E complete & approved, S2.2 all systems GO for merge to main"
+sprint_schedule:
+  sprint_1:
+    name: "Foundation & Domain Management"
+    dates: "03/03/2026 - 16/03/2026"
+    points: 21
+  sprint_2:
+    name: "Data Generation & Configuration"
+    dates: "17/03/2026 - 30/03/2026"
+    points: 44
+    note: "Restructuration 2026-02-28: +10 pts (S2.4 JSON Export, S2.5-S2.7 clarified); S2.8/S2.9 deferred to S3"
+  sprint_3:
+    name: "Advanced Features & Scalability"
+    dates: "31/03/2026 - 13/04/2026"
+    points: 38
+    note: "Added: S2.8 Activity Tracking (5pts) + S2.9 Dataset Versioning (5pts) from S2 replan"
+
+# Epic and story status tracking
+development_status:
+  # EPIC 1: Foundation & Core MVP
+  epic-1: "done"
+  1-1-setup-backend-infrastructure: "done"
+  1-2-implement-domain-entity-repository: "done"
+  1-3-implement-domain-rest-controller: "done"
+  1-4-frontend-setup-base-components: "done"
+  1-5-ui-domain-management-dashboard: "done"
+
+  # EPIC 2: Data Generation Engine
+  epic-2: "in-progress"
+  2-1-implement-datageneratorservice: "done"
+  2-2-implement-data-type-detection: "ready"
+  2-3-implement-csv-parser-column-configurator: "done"
+  2-4-implement-json-export-engine: "ready"
+  2-5-implement-csv-upload-preview-ui: "ready"
+  2-6-implement-data-configuration-ui: "ready"
+  2-7-implement-data-viewer-ui: "ready"
+  2-8-implement-activity-tracking: "backlog"
+  2-9-implement-dataset-versioning: "backlog"
+
+  # EPIC 3: Advanced Features & Scalability
+  epic-3: "backlog"
+  # Stories deferred from S2 replan (2026-02-28)
+  2-8-activity-tracking-s3: "backlog"
+  2-9-dataset-versioning-s3: "backlog"
+  # New S3 stories
+  3-1-implement-batch-generation-support: "backlog"
+  3-2-implement-websocket-notifications: "backlog"
+  3-3-implement-e2e-testing-suite: "backlog"
+  3-4-docker-deployment-documentation: "backlog"
+
+# Story metadata
+story_metadata:
+  1-1-setup-backend-infrastructure:
+    title: "Setup Backend Infrastructure"
+    epic: 1
+    points: 3
+    sprint: 1
+    assignees: ["Amelia"]
+  1-2-implement-domain-entity-repository:
+    title: "Implement Domain Entity & Repository"
+    epic: 1
+    points: 5
+    sprint: 1
+    assignees: ["Amelia"]
+  1-3-implement-domain-rest-controller:
+    title: "Implement Domain REST Controller"
+    epic: 1
+    points: 5
+    sprint: 1
+    assignees: ["Amelia"]
+  1-4-frontend-setup-base-components:
+    title: "Frontend Setup & Base Components"
+    epic: 1
+    points: 3
+    sprint: 1
+    assignees: ["Sally"]
+  1-5-ui-domain-management-dashboard:
+    title: "UI Domain Management & Dashboard"
+    epic: 1
+    points: 5
+    sprint: 1
+    assignees: ["Sally"]
+  2-1-implement-datageneratorservice:
+    title: "Implement DataGeneratorService"
+    epic: 2
+    points: 5
+    sprint: 2
+    assignees: ["Amelia"]
+  2-2-implement-data-type-detection:
+    title: "Implement Data Type Detection"
+    epic: 2
+    points: 8
+    sprint: 2
+    assignees: ["Amelia"]
+  2-3-implement-csv-parser-column-configurator:
+    title: "Create Data Generation REST API"
+    epic: 2
+    points: 8
+    sprint: 2
+    assignees: ["Amelia"]
+    note: "Actual implementation: REST API for data generation (not CSV parser)"
+  2-4-implement-json-export-engine:
+    title: "Implement JSON Export Engine"
+    epic: 2
+    points: 5
+    sprint: 2
+    assignees: ["Amelia"]
+  2-5-implement-csv-upload-preview-ui:
+    title: "Implement CSV Upload & Preview UI"
+    epic: 2
+    points: 6
+    sprint: 2
+    assignees: ["Sally"]
+  2-6-implement-data-configuration-ui:
+    title: "Implement Data Configuration Interface"
+    epic: 2
+    points: 6
+    sprint: 2
+    assignees: ["Sally"]
+  2-7-implement-data-viewer-ui:
+    title: "Implement Data Viewer & Management UI"
+    epic: 2
+    points: 6
+    sprint: 2
+    assignees: ["Sally"]
+  2-8-implement-activity-tracking:
+    title: "Implement Activity Tracking System"
+    epic: 2
+    points: 5
+    sprint: 2
+    assignees: ["Amelia"]
+  2-9-implement-dataset-versioning:
+    title: "Implement Dataset Versioning & Reset"
+    epic: 2
+    points: 5
+    sprint: 2
+    assignees: ["Amelia"]
+  3-1-implement-activity-tracking-system:
+    title: "Implement Activity Tracking System"
+    epic: 3
+    points: 5
+    sprint: 3
+    assignees: ["Amelia"]
+  3-2-implement-batch-generation-support:
+    title: "Implement Batch Generation Support"
+    epic: 3
+    points: 8
+    sprint: 3
+    assignees: ["Amelia"]
+  3-3-implement-websocket-notifications:
+    title: "Implement WebSocket Notifications"
+    epic: 3
+    points: 8
+    sprint: 3
+    assignees: ["Amelia"]
+  3-4-implement-e2e-testing-suite:
+    title: "Implement E2E Testing Suite"
+    epic: 3
+    points: 5
+    sprint: 3
+    assignees: ["Quinn"]
+  3-5-docker-deployment-documentation:
+    title: "Docker Deployment & Documentation"
+    epic: 3
+    points: 2
+    sprint: 3
+    assignees: ["Amelia"]

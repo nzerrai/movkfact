@@ -1,0 +1,97 @@
+# Pattern-based detection rules for CSV column type detection
+# Supports 13 ColumnTypes across 3 typologies
+# Used by PatternCache for regex compilation at startup
+
+# PERSONAL TYPOLOGY (6 types)
+FIRST_NAME:
+  - "(?i)^first_?name$"
+  - "(?i)^prenom$"
+  - "(?i)^forename$"
+  - "(?i)^given_?name$"
+
+LAST_NAME:
+  - "(?i)^last_?name$"
+  - "(?i)^family_?name$"
+  - "(?i)^nom$"
+  - "(?i)^surname$"
+
+EMAIL:
+  - "(?i)^email$"
+  - "(?i)^e_?mail$"
+  - "(?i)^electronic_?mail$"
+  - "(?i)^mail_?address$"
+
+GENDER:
+  - "(?i)^gender$"
+  - "(?i)^sex$"
+  - "(?i)^genre$"
+  - "(?i)^sexe$"
+
+PHONE:
+  - "(?i)^phone$"
+  - "(?i)^telephone$"
+  - "(?i)^tel$"
+  - "(?i)^phone_?number$"
+
+ADDRESS:
+  - "(?i)^address$"
+  - "(?i)^adresse$"
+  - "(?i)^street$"
+  - "(?i)^rue$"
+  - "(?i)^location$"
+  - "(?i)^full_?address$"
+
+# FINANCIAL TYPOLOGY (3 types)
+AMOUNT:
+  - "(?i)^amount$"
+  - "(?i)^montant$"
+  - "(?i)^sum$"
+  - "(?i)^total$"
+  - "(?i)^value$"
+  - "(?i)^price$"
+
+ACCOUNT_NUMBER:
+  - "(?i)^account_?number$"
+  - "(?i)^account$"
+  - "(?i)^compte$"
+  - "(?i)^iban$"
+  - "(?i)^bban$"
+  - "(?i)^account_?id$"
+
+CURRENCY:
+  - "(?i)^currency$"
+  - "(?i)^devise$"
+  - "(?i)^code_?currency$"
+  - "(?i)^currency_?code$"
+  - "(?i)^curr$"
+
+# TEMPORAL TYPOLOGY (4 types)
+BIRTH_DATE:
+  - "(?i)^date_?birth$"
+  - "(?i)^birthdate$"
+  - "(?i)^birth_?date$"
+  - "(?i)^naissance$"
+  - "(?i)^date_?of_?birth$"
+  - "(?i)^dob$"
+
+DATE:
+  - "(?i)^date$"
+  - "(?i)^created_?at$"
+  - "(?i)^created_?date$"
+  - "(?i)^date_?created$"
+  - "(?i)^modified_?at$"
+  - "(?i)^updated_?at$"
+  - "(?i)^timestamp$"
+
+TIME:
+  - "(?i)^time$"
+  - "(?i)^heure$"
+  - "(?i)^hour$"
+  - "(?i)^minute$"
+  - "(?i)^time_?of_?day$"
+
+TIMEZONE:
+  - "(?i)^timezone$"
+  - "(?i)^tz$"
+  - "(?i)^timezone_?code$"
+  - "(?i)^time_?zone$"

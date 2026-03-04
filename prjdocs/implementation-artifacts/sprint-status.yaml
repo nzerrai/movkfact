@@ -1,7 +1,17 @@
 ---
 project: movkfact
-date: 28 février 2026
-date_updated: "28 février 2026 @ 22:55 CET - CHECKPOINT SUIVANT ÉTABLI: Phase C framework complete, awaiting Mary's data"
+date: "01 mars 2026"
+date_updated: "04 mars 2026 @ CET - SPRINT 7 CLOSED: Epic 7 Wizard livré (13pts, 476 tests). Code review adversarial — 8 HIGH/MEDIUM corrigées. Epics 8/9/10 reportés Sprint 8 (17pts)."
+date_sprint7_closed: "04 mars 2026 @ CET - SPRINT 7 CLOSED: Epic 7 complet (S7.1 Backend 5pts + S7.2 Frontend 8pts = 13pts). 454 tests backend + 22 Jest wizard = 476 passants. SecurityConfig hardened. WizardStep4 field names fixed. Sprint 8 à planifier."
+date_sprint6_closed: "04 mars 2026 @ CET - SPRINT 6 CLOSED: Epic 6 Data Editor complet. S6.1 Backend (5pts, 434 tests) + S6.2 Frontend (6pts, 16 tests Jest). FRs FR-011/012/016/019 couverts. Epic 7 Wizard reporté Sprint 7."
+date_epic6_closed: "04 mars 2026 @ CET - EPIC 6 CLOSED: Data Editor (Éditeur de données inline). S6.1 Backend Row Editor ✅ (434/434 tests) + S6.2 Frontend Data Editor ✅ (16/16 Jest tests). FRs FR-011/012/016/019 covered. Ready for Epic 7 Wizard."
+date_s33_closed: "03 mars 2026 @ CET - S3.3 CLOSED: WebSocket Notifications ENHANCED — review approved, all fixes merged, app running."
+date_s41_closed: "03 mars 2026 @ CET - S4.1 CLOSED: Batch Generation UI validated and approved after architectural and adversarial reviews."
+date_s42_closed: "03 mars 2026 @ CET - S4.2 CLOSED: PostgreSQL Migration — pom.xml (pg driver + Flyway), V001-V005 migrations, docker-compose.yml, application-prod.yml, dev-pg profile. 406 tests passing, 5/5 Flyway migrations applied."
+date_s34_ready: "03 mars 2026 @ CET - S3.4 READY-FOR-DEV: Context story created for Quinn — Cypress E2E, 10 scenarios, CI/CD pipeline, coverage targets."
+date_sprint2_closed: "01 mars 2026 @ 20:45 CET - Sprint 2 OFFICIALLY CLOSED: All acceptance criteria met, system stable, ready for production beta"
+date_sprint3_activated: "01 mars 2026 @ 20:45 CET - Sprint 3 ACTIVATED: Team briefed, stories ready, Amelia assigned to lead backend work"
+date_s25_phase2_complete: "01 mars 2026 @ 10:30 CET - S2.5 PHASE 2 COMPLETE: Upload history visibility solved! Direct modal access + workflow integration (2 approaches)"
 date_amelia_activation: "28 février 2026 @ 21:50 CET - GO APPROVED, Phase A begins now"
 date_phase_a_complete: "28 février 2026 @ 22:36 CET - Amelia Phase A terminée, architecture complètement comprise"
 date_phase_b_approved: "28 février 2026 @ 22:36 CET - Phase B approuvée (Performance testing)"
@@ -11,23 +21,52 @@ date_phase_c_launched: "28 février 2026 @ 22:50 CET - Phase C LAUNCHED, Accurac
 date_phase_c_continued: "28 février 2026 @ 10:45 CET - Phase C Continued COMPLETE: 82 CSV files tested, AccuracyMeasurementRealDataTests 5/5 PASSING, global accuracy 63.44%"
 date_ac6_measurement_real_data: "28 février 2026 @ 10:53 CET - AC6 MEASUREMENT ON MARY'S REAL DATA: 4 datasets (195 records), Global Accuracy 70.20% (baseline established), optimization roadmap clear for 85% target"
 date_phase_d_completed: "28 février 2026 @ 11:25 CET - PHASE D COMPLETE: Javadoc ✅, Swagger ✅, Tests 348/348 ✅, Coverage 89% ✅, Checklist ✅ - READY FOR PHASE E"
-date_phase_e_winston_review: "28 février 2026 @ 11:35 CET - WINSTON ARCHITECTURE & CODE REVIEW COMPLETE - ✅ APPROVED FOR PRODUCTION (Ready for merge to main)"
-date_checkpoint_next: "28 février 2026 @ 11:35 CET - FINAL CHECKPOINT: All Phases A-E complete & approved, S2.2 all systems GO for merge to main"
+date_checkpoint_next: "28 février 2026 @ 23:59 CET - CHECKPOINT: Phases A-E complete/ready, all deliverables prepared, system stable, ready for Winston approval (Phase E scheduled 09/03)"
+date_s26_design_approved: "01 mars 2026 @ 08:00 CET - S2.6 DESIGN REVIEW: All design decisions validated (10k row limit, S2.4 API export, new npm packages)"
+date_s26_components_created: "01 mars 2026 @ 08:45 CET - S2.6 COMPONENTS CREATED: 5 JSX files (PersonalFieldConfig, FinancialFieldConfig, TemporalFieldConfig, ConfigurationPanel, ResultViewer) - 860 LOC total"
+date_s26_tests_complete: "01 mars 2026 @ 09:15 CET - S2.6 TESTS COMPLETE: 23/23 Jest tests passing (100%), all components integrated with S2.3/S2.4 APIs, full acceptance criteria met"
 sprint_schedule:
   sprint_1:
     name: "Foundation & Domain Management"
     dates: "03/03/2026 - 16/03/2026"
     points: 21
+    status: "done"
   sprint_2:
     name: "Data Generation & Configuration"
     dates: "17/03/2026 - 30/03/2026"
     points: 44
-    note: "Restructuration 2026-02-28: +10 pts (S2.4 JSON Export, S2.5-S2.7 clarified); S2.8/S2.9 deferred to S3"
+    status: "done"
+    note: "Restructuration 2026-02-28: +10 pts (S2.4 JSON Export, S2.5-S2.7 clarified); S2.8/S2.9 deferred to S3. CLOSED 01/03/2026 @ 20:45 CET"
   sprint_3:
-    name: "Advanced Features & Scalability"
-    dates: "31/03/2026 - 13/04/2026"
-    points: 38
-    note: "Added: S2.8 Activity Tracking (5pts) + S2.9 Dataset Versioning (5pts) from S2 replan"
+    name: "Advanced Features & Scalability + UX Improvements"
+    dates: "02/03/2026 - 13/04/2026"
+    points: 34
+    status: "done"
+    note: "CLOSED 03/03/2026. Delivered: S3.0+S3.1+S3.2+S3.3 (22pts). Skipped: S3.4 E2E + S3.5 Docker. MVP validated in Party Mode session."
+  sprint_4:
+    name: "MVP Hardening — Batch UI + PostgreSQL"
+    dates: "04/03/2026 - 17/03/2026"
+    points: 10
+    status: "done"
+    note: "CLOSED 03/03/2026. S4.1 Batch UI (5pts) + S4.2 PostgreSQL (5pts). S4.3 Auth + S4.4 E2E reportés Sprint 5."
+  sprint_5:
+    name: "Extended Data Types + Auth + E2E"
+    dates: "18/03/2026 - 31/03/2026"
+    points: 29
+    status: "skipped"
+    note: "SKIPPED — priorisé Epic 6 (Data Editor) à la place. S5.1/S5.2/S5.3 + S4.3/S4.4 restent en backlog."
+  sprint_6:
+    name: "MVP Completion — Éditeur de données + Wizard manuel"
+    dates: "04/03/2026 - 04/03/2026"
+    points: 11
+    status: "done"
+    note: "CLOSED 04/03/2026. Livré: Epic 6 complet (S6.1 Backend 5pts + S6.2 Frontend 6pts = 11pts). Tests: 434 backend + 16 Jest = 450 passants. FRs FR-011/012/016/019 couverts. Epic 7 Wizard (13pts) reporté Sprint 7."
+  sprint_7:
+    name: "Wizard Manuel + Domain UX + Advanced API"
+    dates: "04/03/2026 - 04/03/2026"
+    points: 13
+    status: "done"
+    note: "CLOSED 04/03/2026. Livré: Epic 7 complet (S7.1 Backend 5pts + S7.2 Frontend 8pts = 13pts). 454 backend tests + 22 Jest wizard = 476 passants. Code review adversarial effectuée. Reportés Sprint 8: Epic 8 (8pts) + Epic 9 (5pts) + Docker (4pts) = 17pts."
 
 # Epic and story status tracking
 development_status:
@@ -40,27 +79,62 @@ development_status:
   1-5-ui-domain-management-dashboard: "done"
 
   # EPIC 2: Data Generation Engine
-  epic-2: "in-progress"
+  epic-2: "done"
   2-1-implement-datageneratorservice: "done"
-  2-2-implement-data-type-detection: "ready"
+  2-2-implement-data-type-detection: "done"
   2-3-implement-csv-parser-column-configurator: "done"
-  2-4-implement-json-export-engine: "ready"
-  2-5-implement-csv-upload-preview-ui: "ready"
-  2-6-implement-data-configuration-ui: "ready"
-  2-7-implement-data-viewer-ui: "ready"
-  2-8-implement-activity-tracking: "backlog"
-  2-9-implement-dataset-versioning: "backlog"
+  2-4-implement-json-export-engine: "done"
+  2-5-implement-csv-upload-preview-ui: "done"
+  2-6-implement-data-configuration-ui: "done"
+  2-7-implement-data-viewer-ui: "done"
+  2-8-implement-activity-tracking: "done"
+  2-9-implement-dataset-versioning: "done"
 
   # EPIC 3: Advanced Features & Scalability
-  epic-3: "backlog"
-  # Stories deferred from S2 replan (2026-02-28)
-  2-8-activity-tracking-s3: "backlog"
-  2-9-dataset-versioning-s3: "backlog"
-  # New S3 stories
-  3-1-implement-batch-generation-support: "backlog"
-  3-2-implement-websocket-notifications: "backlog"
-  3-3-implement-e2e-testing-suite: "backlog"
-  3-4-docker-deployment-documentation: "backlog"
+  epic-3: "done"
+  3-0-dataset-naming-custom-names: "done"
+  3-1-implement-activity-tracking-service: "done"
+  3-2-implement-spring-batch-for-batch-generation: "done"
+  3-3-websocket-notifications-for-batch-jobs: "done"
+  3-4-end-to-end-testing-test-automation: "skipped"
+  3-5-docker-deployment-final-documentation: "skipped"
+
+  # EPIC 4: MVP Hardening
+  epic-4: "in-progress"
+  4-1-batch-generation-ui: "done"
+  4-2-postgresql-migration: "done"
+  4-3-auth-jwt: "deferred-sprint-5"
+  4-4-e2e-tests-light: "deferred-sprint-5"
+
+  # EPIC 5: Extended Data Types (3 catégories PRD manquantes)
+  epic-5: "backlog"
+  5-1-donnees-categorielles: "backlog"
+  5-2-donnees-techniques: "backlog"
+  5-3-donnees-aleatoires-personnalisables: "backlog"
+
+  # EPIC 6: Data Editor — Éditeur de données inline (FR-011/012/016/019) — Sprint 6
+  epic-6: "done"
+  6-1-backend-row-editor-api: "done"
+  6-2-frontend-data-editor-inline: "done"
+
+  # EPIC 7: Manual Dataset Wizard — Wizard création manuelle (FR-004/006/010) — Sprint 6
+  epic-7: "done"
+  7-1-backend-wizard-support: "done"
+  7-2-frontend-wizard-4-steps: "done"
+  epic-7-retrospective: "done"
+
+  # EPIC 8: Domain Overview Enrichment — Stats agrégées domaines (FR-002/003)
+  epic-8: "in-progress"
+  8-1-backend-domain-aggregates: "ready-for-dev"
+  8-2-frontend-domain-stats: "backlog"
+
+  # EPIC 9: Advanced API — Filtrage par row + sélection colonnes (FR-014) — Sprint 7
+  epic-9: "backlog"
+  9-1-api-row-filtering: "backlog"
+
+  # EPIC 10: Quality Gate & Déploiement — Docker + Docs — Sprint 7
+  epic-10: "backlog"
+  s3-5b-docker-documentation: "backlog"
 
 # Story metadata
 story_metadata:
@@ -149,33 +223,158 @@ story_metadata:
     points: 5
     sprint: 2
     assignees: ["Amelia"]
-  3-1-implement-activity-tracking-system:
-    title: "Implement Activity Tracking System"
+  3-0-dataset-naming-custom-names:
+    title: "Dataset Naming - Allow Custom Names During Creation"
+    epic: 3
+    points: 3
+    sprint: 3
+    assignees: ["Sally", "Amelia"]
+    priority: "HIGH"
+    description: "Allow users to define custom dataset names before creation. Validate uniqueness per domain, enforce min/max length (3-50 chars). Add TextField in ConfigurationPanel, check-name API endpoint, UNIQUE constraint in DB."
+  3-1-implement-activity-tracking-service:
+    title: "Implement Activity Tracking Service"
     epic: 3
     points: 5
     sprint: 3
     assignees: ["Amelia"]
-  3-2-implement-batch-generation-support:
-    title: "Implement Batch Generation Support"
+    description: "Service pour tracker activités sur les jeux de données (statuts, historique, versioning). Activity entity, ActivityService, listeners, reset logic, tests >80%"
+  3-2-implement-spring-batch-for-batch-generation:
+    title: "Implement Spring Batch for Batch Generation"
+    epic: 3
+    points: 6
+    sprint: 3
+    assignees: ["Amelia"]
+    description: "Spring Batch pour génération multiple jeux en parallèle (4 workers). Endpoint /api/batch/generate, JobRepository, status tracking, performance <10s pour 10 jeux"
+  3-3-websocket-notifications-for-batch-jobs:
+    title: "WebSocket Notifications for Batch Jobs (ENHANCED)"
     epic: 3
     points: 8
     sprint: 3
-    assignees: ["Amelia"]
-  3-3-implement-websocket-notifications:
-    title: "Implement WebSocket Notifications"
+    assignees: ["Amelia", "Sally"]
+    description: "WebSocket backend + frontend pour notifications temps réel ENHANCED. Spring WebSocket config, STOMP, persistent job status, NotificationPanel with real-time progress bar, toast notifications, error retry notifications, graceful reconnection handling."
+  3-4-end-to-end-testing-test-automation:
+    title: "End-to-End Testing & Test Automation (COMPREHENSIVE)"
     epic: 3
     points: 8
-    sprint: 3
-    assignees: ["Amelia"]
-  3-4-implement-e2e-testing-suite:
-    title: "Implement E2E Testing Suite"
-    epic: 3
-    points: 5
     sprint: 3
     assignees: ["Quinn"]
-  3-5-docker-deployment-documentation:
-    title: "Docker Deployment & Documentation"
+    description: "E2E tests COMPREHENSIVE (Cypress/Playwright): 8-10 scenarios couverts (naming, batch, WebSocket, errors, performance), >80% coverage, performance metrics, CI/CD integration, coverage reporting dashboard"
+  3-5-docker-deployment-final-documentation:
+    title: "Docker Deployment & Final Documentation (LIGHT)"
     epic: 3
-    points: 2
+    points: 4
     sprint: 3
     assignees: ["Amelia"]
+    description: "Docker LIGHT (backend/frontend), docker-compose.yml, basic README, health checks. Excludes: Multi-stage builds, CI/CD automation, Kubernetes."
+  4-1-batch-generation-ui:
+    title: "Batch Generation UI"
+    epic: 4
+    points: 5
+    sprint: 4
+    assignees: ["Sally", "Amelia"]
+    priority: "HIGH"
+    description: "Modal de génération batch depuis la page Domains. Sélection multi-domaines, config par dataset (nom, count, colonnes), appel POST /api/batch/generate, activation automatique du NotificationPanel WebSocket."
+  4-2-postgresql-migration:
+    title: "PostgreSQL Migration"
+    epic: 4
+    points: 5
+    sprint: 4
+    assignees: ["Amelia"]
+    priority: "HIGH"
+    description: "Remplacement H2 par PostgreSQL. Flyway migrations, docker-compose.yml avec service postgres, application-prod.yml, seed data pour démo. JPA entities inchangées."
+  4-3-auth-jwt:
+    title: "Authentication JWT"
+    epic: 4
+    points: 8
+    sprint: 4
+    assignees: ["Amelia"]
+    priority: "MEDIUM"
+    description: "JwtAuthenticationFilter + UserDetailsService + POST /api/auth/login. Compte admin configuré via application.yml (pas de table users). Protège les routes non-publiques. jjwt déjà dans pom.xml."
+  4-4-e2e-tests-light:
+    title: "E2E Tests Light (Smoke + 3 flux critiques)"
+    epic: 4
+    points: 5
+    sprint: 4
+    assignees: ["Quinn"]
+    priority: "MEDIUM"
+    description: "Cypress smoke test (5 scénarios core) + 3 flux critiques: domain CRUD, génération simple, batch. Pas de CI/CD GitHub Actions (Sprint 5). Cypress 13, fixtures CSV, rapport HTML."
+  5-1-donnees-categorielles:
+    title: "Données Catégorielles — STATUS, CATEGORY, LEVEL"
+    epic: 5
+    points: 5
+    sprint: 5
+    assignees: ["Amelia", "Sally"]
+    priority: "MEDIUM"
+    description: "Nouveaux types STATUS/CATEGORY/LEVEL. Générateurs Java avec pondération, détection CSV automatique, composant React CategoricalFieldConfig. PRD section 2.2 — catégories manquantes."
+  5-2-donnees-techniques:
+    title: "Données Techniques — URL, IP_ADDRESS, UUID, SOFTWARE_VERSION, FILE_SIZE"
+    epic: 5
+    points: 6
+    sprint: 5
+    assignees: ["Amelia", "Sally"]
+    priority: "MEDIUM"
+    description: "5 nouveaux types techniques. URL réalistes, IPv4 valides, UUID v4, SemVer, tailles fichiers avec unité. Composant React TechnicalFieldConfig. PRD section 2.2 — données techniques."
+  5-3-donnees-aleatoires-personnalisables:
+    title: "Données Aléatoires Personnalisables — BOOLEAN, INTEGER, DECIMAL, LOREM_IPSUM"
+    epic: 5
+    points: 5
+    sprint: 5
+    assignees: ["Amelia", "Sally"]
+    priority: "LOW"
+    description: "4 types primitifs configurables. BOOLEAN avec ratio, INTEGER/DECIMAL avec min/max, LOREM_IPSUM avec modes (mot/phrase/paragraphe). Composant React RandomFieldConfig. PRD section 2.2 — données aléatoires."
+  6-1-backend-row-editor-api:
+    title: "Backend Row Editor API"
+    epic: 6
+    points: 5
+    sprint: null
+    assignees: ["Amelia"]
+    priority: "HIGH"
+    description: "GET/PUT/DELETE row-level endpoints. Parse dataJson, modification partielle, suppression + réindexage. ActivityActionType ROW_MODIFIED/ROW_DELETED. Flyway V006. FRs: FR-011/012/016/019."
+  6-2-frontend-data-editor-inline:
+    title: "Frontend Éditeur de données inline"
+    epic: 6
+    points: 6
+    sprint: null
+    assignees: ["Sally"]
+    priority: "HIGH"
+    description: "Onglet 'Éditeur de données' dans la vue dataset. Cellules éditables double-clic, suppression ligne avec confirmation dialog, panneau historique activité rétractable. FRs: FR-011/012/016/019."
+  7-1-backend-wizard-support:
+    title: "Backend Wizard Support"
+    epic: 7
+    points: 5
+    sprint: null
+    assignees: ["Amelia"]
+    priority: "HIGH"
+    description: "Endpoint POST /api/datasets/preview (5 lignes sans persistance). Extension ColumnConfigDTO avec constraints (min/max, dateFrom/dateTo, maxLength). FRs: FR-004/006/008."
+  7-2-frontend-wizard-4-steps:
+    title: "Frontend Wizard de création manuelle 4 étapes"
+    epic: 7
+    points: 8
+    sprint: null
+    assignees: ["Sally"]
+    priority: "HIGH"
+    description: "Wizard 4 étapes: (1) nom+lignes, (2) colonnes+types+constraints+drag-reorder, (3) preview 5 lignes, (4) confirmation+génération. Point d'entrée depuis Domain Management. FRs: FR-004/006/010."
+  8-1-backend-domain-aggregates:
+    title: "Backend Agrégats par domaine"
+    epic: 8
+    points: 4
+    sprint: null
+    assignees: ["Amelia"]
+    priority: "MEDIUM"
+    description: "GET /api/domains enrichi: datasetCount, totalRows, statuses (downloaded/modified/viewed). GET /api/domains/{id}/datasets avec statuts + lastActivity. Requête JPQL sans N+1. FRs: FR-002/003."
+  8-2-frontend-domain-stats:
+    title: "Frontend Enrichissement liste domaines"
+    epic: 8
+    points: 4
+    sprint: null
+    assignees: ["Sally"]
+    priority: "MEDIUM"
+    description: "DomainTable: colonnes Datasets + Lignes totales + badges statuts. DomainDatasetsModal: statuts + tri + filtre. StatusBadge composant partagé. FRs: FR-002/003."
+  9-1-api-row-filtering:
+    title: "API Filtrage avancé — rowIds + sélection colonnes"
+    epic: 9
+    points: 5
+    sprint: null
+    assignees: ["Amelia"]
+    priority: "MEDIUM"
+    description: "GET /api/data-sets/{id}/rows?rowIds=0,5,10&cols=firstName,email. Filtrage ciblé + sélection colonnes. Colonnes/rowIds inconnus ignorés silencieusement. Documentation Swagger. FR: FR-014."

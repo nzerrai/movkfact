@@ -22,6 +22,9 @@ public class DataSetDTO implements Serializable {
     @JsonProperty("rowCount")
     private Integer rowCount;
     
+    @JsonProperty("columnCount")
+    private Integer columnCount;
+    
     @JsonProperty("generationTimeMs")
     private Long generationTimeMs;
     
@@ -34,12 +37,13 @@ public class DataSetDTO implements Serializable {
     // Constructors
     public DataSetDTO() {}
 
-    public DataSetDTO(Long id, Long domainId, String name, Integer rowCount, 
+    public DataSetDTO(Long id, Long domainId, String name, Integer rowCount, Integer columnCount,
                      Long generationTimeMs, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.domainId = domainId;
         this.name = name;
         this.rowCount = rowCount;
+        this.columnCount = columnCount;
         this.generationTimeMs = generationTimeMs;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -76,6 +80,14 @@ public class DataSetDTO implements Serializable {
 
     public void setRowCount(Integer rowCount) {
         this.rowCount = rowCount;
+    }
+
+    public Integer getColumnCount() {
+        return columnCount;
+    }
+
+    public void setColumnCount(Integer columnCount) {
+        this.columnCount = columnCount;
     }
 
     public Long getGenerationTimeMs() {

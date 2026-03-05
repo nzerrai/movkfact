@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, Button, Grid } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import StorageIcon from '@mui/icons-material/Storage';
@@ -9,6 +9,23 @@ import { useDomainContext } from '../context/DomainContext';
 const Dashboard = () => {
   const navigate = useNavigate();
   const { state } = useDomainContext();
+  const [totalDatasets, setTotalDatasets] = useState(0);
+
+  useEffect(() => {
+    const fetchTotalDatasets = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/data-sets/count');
+        if (response.ok) {
+          const data = await response.json();
+          setTotalDatasets(data.data || 0);
+        }
+      } catch (error) {
+        console.error('Failed to fetch total datasets:', error);
+      }
+    };
+
+    fetchTotalDatasets();
+  }, []);
 
   return (
     <Box>
@@ -28,7 +45,7 @@ const Dashboard = () => {
           />
         </Grid>
         <Grid item xs={12} sm={6} md={4}>
-          <StatCard title="Total Datasets" value="0" icon={<PersonIcon sx={{ color: 'secondary.main' }} />} />
+          <StatCard title="Total Datasets" value={totalDatasets.toString()} icon={<PersonIcon sx={{ color: 'secondary.main' }} />} />
         </Grid>
       </Grid>
 

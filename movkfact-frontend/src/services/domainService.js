@@ -47,10 +47,14 @@ export const getDomainById = async (id) => {
  * @returns {Promise<Object>} Created domain object
  */
 export const createDomain = async (domain) => {
+  console.log('🔍 createDomain called with:', domain);
   try {
+    console.log('📡 Making POST request to /api/domains');
     const response = await api.post('/api/domains', domain);
+    console.log('✅ createDomain response:', response);
     return response.data.data || response.data;
   } catch (error) {
+    console.error('❌ createDomain error:', error);
     throw error;
   }
 };
@@ -78,6 +82,21 @@ export const updateDomain = async (id, domain) => {
 export const deleteDomain = async (id) => {
   try {
     await api.delete(`/api/domains/${id}`);
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * Preview 5 sample rows from column configuration (S7.1 endpoint)
+ * @param {Array} columns - [{ name, columnType, constraints }]
+ * @param {number} count - Number of preview rows (max 5)
+ * @returns {Promise<Object>} PreviewResponseDTO { previewRows, columnCount }
+ */
+export const previewDataset = async (columns, count = 5) => {
+  try {
+    const response = await api.post('/api/datasets/preview', { columns, count });
+    return response.data.data || response.data;
   } catch (error) {
     throw error;
   }

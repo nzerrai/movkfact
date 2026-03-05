@@ -17,13 +17,16 @@ export const useApi = () => {
    * @returns {Promise<any>} The API response data
    */
   const execute = useCallback(async (apiFunction, ...args) => {
+    console.log('🔍 useApi.execute called with function:', apiFunction.name, 'args:', args);
     setLoading(true);
     setError(null);
     try {
       const result = await apiFunction(...args);
+      console.log('✅ useApi.execute success:', result);
       setData(result);
       return result;
     } catch (err) {
+      console.error('❌ useApi.execute error:', err);
       // Parse error response from backend
       const errorData = err.response?.data;
       const status = err.response?.status;
@@ -51,6 +54,7 @@ export const useApi = () => {
         data: errorData,
       };
 
+      console.error('❌ useApi.execute parsed error:', errorObject);
       setError(errorObject);
       throw errorObject;
     } finally {

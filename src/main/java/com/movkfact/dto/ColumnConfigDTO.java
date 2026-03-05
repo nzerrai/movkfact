@@ -1,6 +1,7 @@
 package com.movkfact.dto;
 
 import com.movkfact.enums.ColumnType;
+import java.util.Map;
 
 /**
  * DTO représentant la configuration d'une colonne pour la génération de données.
@@ -13,6 +14,7 @@ public class ColumnConfigDTO {
     private Integer maxValue;
     private Boolean nullable;
     private String additionalConfig;
+    private Map<String, Object> constraints;
 
     // Constructeurs
     public ColumnConfigDTO() {
@@ -83,5 +85,13 @@ public class ColumnConfigDTO {
 
     public void setAdditionalConfig(String additionalConfig) {
         this.additionalConfig = additionalConfig;
+    }
+
+    public Map<String, Object> getConstraints() {
+        return constraints;
+    }
+
+    public void setConstraints(Map<String, Object> constraints) {
+        this.constraints = constraints;
     }
 }

@@ -15,10 +15,14 @@ import {
   Typography,
   useMediaQuery,
   IconButton,
+  Tooltip,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import StorageIcon from '@mui/icons-material/Storage';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 
 /**
  * DomainTable component - displays domains as table on desktop, cards on mobile
@@ -27,6 +31,9 @@ export const DomainTable = ({
   domains = [],
   onEdit,
   onDelete,
+  onUpload,
+  onViewDatasets,
+  onCreateDataset,
   loading = false,
   searchText = '',
 }) => {
@@ -89,6 +96,36 @@ export const DomainTable = ({
                   Updated: {formatDate(domain.updatedAt)}
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
+                  <Tooltip title="View Uploaded Datasets">
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      startIcon={<StorageIcon />}
+                      onClick={() => onViewDatasets?.(domain)}
+                      fullWidth
+                    >
+                      Datasets
+                    </Button>
+                  </Tooltip>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    startIcon={<AddCircleOutlineIcon />}
+                    onClick={() => onCreateDataset?.(domain)}
+                    fullWidth
+                    sx={{ color: 'success.main', borderColor: 'success.main' }}
+                  >
+                    Créer
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    startIcon={<CloudUploadIcon />}
+                    onClick={() => onUpload?.(domain)}
+                    fullWidth
+                  >
+                    Upload CSV
+                  </Button>
                   <Button
                     size="small"
                     variant="outlined"
@@ -138,21 +175,50 @@ export const DomainTable = ({
               <TableCell>{formatDate(domain.createdAt)}</TableCell>
               <TableCell>{formatDate(domain.updatedAt)}</TableCell>
               <TableCell align="center">
-                <IconButton
-                  size="small"
-                  onClick={() => onEdit?.(domain)}
-                  title="Edit"
-                >
-                  <EditIcon fontSize="small" />
-                </IconButton>
-                <IconButton
-                  size="small"
-                  color="error"
-                  onClick={() => onDelete?.(domain)}
-                  title="Delete"
-                >
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
+                <Tooltip title="Créer un dataset">
+                  <IconButton
+                    size="small"
+                    onClick={() => onCreateDataset?.(domain)}
+                    sx={{ color: 'success.main' }}
+                  >
+                    <AddCircleOutlineIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="View Uploaded Datasets">
+                  <IconButton
+                    size="small"
+                    onClick={() => onViewDatasets?.(domain)}
+                    sx={{ color: 'primary.main' }}
+                  >
+                    <StorageIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Upload CSV">
+                  <IconButton
+                    size="small"
+                    onClick={() => onUpload?.(domain)}
+                    sx={{ color: 'info.main' }}
+                  >
+                    <CloudUploadIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Edit">
+                  <IconButton
+                    size="small"
+                    onClick={() => onEdit?.(domain)}
+                  >
+                    <EditIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Delete">
+                  <IconButton
+                    size="small"
+                    color="error"
+                    onClick={() => onDelete?.(domain)}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
               </TableCell>
             </TableRow>
           ))}

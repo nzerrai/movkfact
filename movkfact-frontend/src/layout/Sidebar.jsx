@@ -16,6 +16,8 @@ import HomeIcon from '@mui/icons-material/Home';
 import PersonIcon from '@mui/icons-material/Person';
 import StorageIcon from '@mui/icons-material/Storage';
 import SettingsIcon from '@mui/icons-material/Settings';
+import IntegrationInstructionsIcon from '@mui/icons-material/IntegrationInstructions';
+import ShieldIcon from '@mui/icons-material/Shield';
 
 const Sidebar = ({ open, onClose }) => {
   const navigate = useNavigate();
@@ -25,8 +27,10 @@ const Sidebar = ({ open, onClose }) => {
   const menuItems = [
     { label: 'Dashboard', icon: <HomeIcon />, path: '/' },
     { label: 'Domains', icon: <PersonIcon />, path: '/domains' },
-    { label: 'Datasets', icon: <StorageIcon />, path: '/datasets', disabled: true },
-    { label: 'Settings', icon: <SettingsIcon />, path: '/settings', disabled: true },
+    { label: 'Datasets', icon: <StorageIcon />, path: '/datasets' },
+    { label: 'Settings', icon: <SettingsIcon />, path: '/settings' },
+    { label: 'API Reference', icon: <IntegrationInstructionsIcon />, path: '/api-reference' },
+    { label: 'Anonymisation RGPD', icon: <ShieldIcon />, path: '/anonymization' },
   ];
 
   const drawerContent = (

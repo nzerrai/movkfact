@@ -4,7 +4,7 @@ import com.movkfact.dto.GenerationRequestDTO;
 import com.movkfact.dto.GenerationResponseDTO;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,20 +40,20 @@ public class DataGeneratorServiceImpl implements DataGeneratorService {
 
         long startTime = System.currentTimeMillis();
         
-        // Créer les générateurs pour chaque colonne demandée
-        Map<String, com.movkfact.service.generator.DataTypeGenerator> generators = new HashMap<>();
+        // Créer les générateurs pour chaque colonne demandée (ordre préservé)
+        Map<String, com.movkfact.service.generator.DataTypeGenerator> generators = new LinkedHashMap<>();
         for (com.movkfact.dto.ColumnConfigDTO column : request.getColumns()) {
-            com.movkfact.service.generator.DataTypeGenerator generator = 
+            com.movkfact.service.generator.DataTypeGenerator generator =
                 com.movkfact.service.generator.GeneratorFactory.createGenerator(column);
             generators.put(column.getName(), generator);
         }
-        
+
         // Générer les données - une ligne à la fois
         List<Map<String, Object>> data = new ArrayList<>();
         for (int i = 0; i < request.getNumberOfRows(); i++) {
-            Map<String, Object> row = new HashMap<>();
-            
-            // Pour chaque colonne, générer une valeur avec son générateur spécialisé
+            Map<String, Object> row = new LinkedHashMap<>();
+
+            // Pour chaque colonne, générer une valeur avec son générateur spécialisé (ordre préservé)
             for (String columnName : generators.keySet()) {
                 Object generatedValue = generators.get(columnName).generate();
                 row.put(columnName, generatedValue);

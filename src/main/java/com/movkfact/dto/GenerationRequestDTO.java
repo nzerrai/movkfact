@@ -1,8 +1,11 @@
 package com.movkfact.dto;
 
-import jakarta.validation.constraints.Min;
- import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Min;
 import java.util.List;
 
 /**
@@ -10,6 +13,10 @@ import java.util.List;
  */
 public class GenerationRequestDTO {
     private Long domainId;
+    
+    @NotBlank(message = "Dataset name must not be blank")
+    @Size(min = 3, max = 50, message = "Dataset name must be between 3 and 50 characters")
+    @Pattern(regexp = "^[a-zA-Z0-9_\\-\\s]+$", message = "Dataset name can only contain alphanumeric characters, underscores, hyphens, and spaces")
     private String datasetName;
     
     @NotNull(message = "Number of rows must not be null")

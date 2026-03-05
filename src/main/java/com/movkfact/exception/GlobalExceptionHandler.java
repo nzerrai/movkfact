@@ -1,5 +1,7 @@
 package com.movkfact.exception;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.movkfact.enums.ColumnType;
 import com.movkfact.response.ApiErrorResponse;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.security.SignatureException;
@@ -8,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -16,6 +19,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -202,6 +206,36 @@ public class GlobalExceptionHandler {
         );
         
         return new ResponseEntity<>(response, ex.getStatusCode());
+    }
+
+    /**
+     * Handle unreadable HTTP message body — notamment quand Jackson reçoit un ColumnType inconnu.
+     * Retourne 400 avec message explicite: "Type inconnu : 'XYZ'. Types valides : [...]"
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiErrorResponse> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex,
+            WebRequest request) {
+
+        String message = "Requête invalide : corps JSON illisible";
+        Throwable cause = ex.getCause();
+
+        if (cause instanceof InvalidFormatException ife) {
+            if (ife.getTargetType() != null
+                    && ife.getTargetType().isEnum()
+                    && ColumnType.class.isAssignableFrom(ife.getTargetType())) {
+                message = "Type inconnu : '" + ife.getValue()
+                        + "'. Types valides : " + Arrays.toString(ColumnType.values());
+            }
+        }
+
+        logger.warn("HTTP message not readable: {}", ex.getMessage());
+        ApiErrorResponse errorResponse = ApiErrorResponse.of(
+                message,
+                HttpStatus.BAD_REQUEST.value(),
+                request.getDescription(false).replace("uri=", "")
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
     /**

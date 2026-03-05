@@ -72,7 +72,7 @@ class DataGenerationControllerTests {
     void testPOST_CreateDataset_Success201() {
         GenerationRequestDTO request = new GenerationRequestDTO();
         request.setNumberOfRows(10);
-        request.setDatasetName("Test Dataset");
+        request.setDatasetName("Test_Dataset");
         List<ColumnConfigDTO> columns = new ArrayList<>();
         columns.add(new ColumnConfigDTO("firstname", ColumnType.FIRST_NAME));
         request.setColumns(columns);
@@ -87,7 +87,7 @@ class DataGenerationControllerTests {
             .header("Location", notNullValue())
             .body("data.id", notNullValue())
             .body("data.domainId", equalTo(testDomainId.intValue()))
-            .body("data.name", equalTo("Test Dataset"))
+            .body("data.name", equalTo("Test_Dataset"))
             .body("data.rowCount", equalTo(10))
             .body("data.generationTimeMs", greaterThanOrEqualTo(0))
             .body("message", notNullValue());
@@ -97,6 +97,7 @@ class DataGenerationControllerTests {
     void testPOST_CreateDataset_InvalidDomain404() {
         GenerationRequestDTO request = new GenerationRequestDTO();
         request.setNumberOfRows(10);
+        request.setDatasetName("Test_Dataset");
         List<ColumnConfigDTO> columns = new ArrayList<>();
         columns.add(new ColumnConfigDTO("firstname", ColumnType.FIRST_NAME));
         request.setColumns(columns);
@@ -163,7 +164,7 @@ class DataGenerationControllerTests {
     void testPOST_CreateDataset_MultipleColumns201() {
         GenerationRequestDTO request = new GenerationRequestDTO();
         request.setNumberOfRows(50);
-        request.setDatasetName("Multi-Column Dataset");
+        request.setDatasetName("Multi_Column_Dataset");
         List<ColumnConfigDTO> columns = new ArrayList<>();
         columns.add(new ColumnConfigDTO("firstname", ColumnType.FIRST_NAME));
         columns.add(new ColumnConfigDTO("email", ColumnType.EMAIL));
@@ -177,13 +178,14 @@ class DataGenerationControllerTests {
             .post("/api/domains/{domainId}/data-sets", testDomainId)
         .then()
             .statusCode(201)
-            .body("data.name", equalTo("Multi-Column Dataset"))
+            .body("data.name", equalTo("Multi_Column_Dataset"))
             .body("data.rowCount", equalTo(50))
             .body("message", notNullValue());
     }
 
     @Test
-    void testPOST_CreateDataset_DefaultName() {
+    void testPOST_CreateDataset_MissingName400() {
+        // datasetName is @NotBlank — omitting it must return 400
         GenerationRequestDTO request = new GenerationRequestDTO();
         request.setNumberOfRows(10);
         List<ColumnConfigDTO> columns = new ArrayList<>();
@@ -196,17 +198,14 @@ class DataGenerationControllerTests {
         .when()
             .post("/api/domains/{domainId}/data-sets", testDomainId)
         .then()
-            .statusCode(201)
-            .body("data.name", notNullValue())
-            .body("data.name", matchesPattern("Dataset_\\d+"))
-            .body("message", notNullValue());
+            .statusCode(400);
     }
 
     @Test
     void testPOST_CreateDataset_DataPersisted() {
         GenerationRequestDTO request = new GenerationRequestDTO();
         request.setNumberOfRows(5);
-        request.setDatasetName("Persisted Dataset");
+        request.setDatasetName("Persisted_Dataset");
         List<ColumnConfigDTO> columns = new ArrayList<>();
         columns.add(new ColumnConfigDTO("firstname", ColumnType.FIRST_NAME));
         request.setColumns(columns);
@@ -230,7 +229,7 @@ class DataGenerationControllerTests {
     void testPOST_CreateDataset_LargeDataset() {
         GenerationRequestDTO request = new GenerationRequestDTO();
         request.setNumberOfRows(1000);
-        request.setDatasetName("Large Dataset");
+        request.setDatasetName("Large_Dataset");
         List<ColumnConfigDTO> columns = new ArrayList<>();
         columns.add(new ColumnConfigDTO("firstname", ColumnType.FIRST_NAME));
         columns.add(new ColumnConfigDTO("email", ColumnType.EMAIL));
@@ -473,6 +472,68 @@ class DataGenerationControllerTests {
             .get("/api/data-sets/{id}", datasetId)
         .then()
             .statusCode(404);
+    }
+
+    @Test
+    void testGET_CheckName_Available() {
+        given()
+        .when()
+            .get("/api/domains/{domainId}/datasets/check-name?name={name}", testDomainId, "new_dataset_name")
+        .then()
+            .statusCode(200)
+            .body("data.available", equalTo(true))
+            .body("message", containsString("available"));
+    }
+
+    @Test
+    void testGET_CheckName_Exists() {
+        // Create a dataset first
+        DataSet existing = new DataSet();
+        existing.setDomainId(testDomainId);
+        existing.setName("existing_name");
+        existing.setRowCount(10);
+        existing.setColumnCount(2);
+        existing.setGenerationTimeMs(100L);
+        existing.setDataJson("[]");
+        dataSetRepository.save(existing);
+
+        given()
+        .when()
+            .get("/api/domains/{domainId}/datasets/check-name?name={name}", testDomainId, "existing_name")
+        .then()
+            .statusCode(200)
+            .body("data.available", equalTo(false))
+            .body("message", containsString("taken"));
+    }
+
+    @Test
+    void testGET_CheckName_InvalidFormat() {
+        given()
+        .when()
+            .get("/api/domains/{domainId}/datasets/check-name?name={name}", testDomainId, "invalid@name")
+        .then()
+            .statusCode(400)
+            .body("error", containsString("contain alphanumeric"));
+    }
+
+    @Test
+    void testGET_CheckName_TooShort() {
+        given()
+        .when()
+            .get("/api/domains/{domainId}/datasets/check-name?name={name}", testDomainId, "ab")
+        .then()
+            .statusCode(400)
+            .body("error", containsString("between 3 and 50"));
+    }
+
+    @Test
+    void testGET_CheckName_Empty() {
+        given()
+        .when()
+            .get("/api/domains/{domainId}/datasets/check-name?name=", testDomainId)
+        .then()
+            .statusCode(400)
+            .body("error", containsString("required"));
     }
 
     @Test

@@ -8,10 +8,14 @@ import java.time.LocalDateTime;
  * Stocke les métadonnées et les résultats de génération en JSON.
  */
 @Entity
-@Table(name = "datasets", indexes = {
-    @Index(name = "idx_domain_id", columnList = "domainId"),
-    @Index(name = "idx_deleted_at", columnList = "deletedAt")
-})
+@Table(name = "datasets", 
+    indexes = {
+        @Index(name = "idx_domain_id", columnList = "domainId"),
+        @Index(name = "idx_deleted_at", columnList = "deletedAt"),
+        @Index(name = "idx_domain_dataset_name", columnList = "domainId, dataset_name")
+    },
+    uniqueConstraints = @UniqueConstraint(columnNames = {"domainId", "dataset_name"})
+)
 public class DataSet {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,11 +24,14 @@ public class DataSet {
     @Column(nullable = false)
     private Long domainId;
 
-    @Column(nullable = false)
-    private String name;
+    @Column(name = "dataset_name", nullable = false)
+    private String datasetName;
 
     @Column(nullable = false)
     private Integer rowCount;
+
+    @Column(nullable = true)
+    private Integer columnCount;
 
     @Column(nullable = false)
     private Long generationTimeMs;
@@ -40,6 +47,12 @@ public class DataSet {
 
     @Column(nullable = true)
     private LocalDateTime deletedAt;
+
+    @Column(nullable = false)
+    private Integer version = 0;
+
+    @Column(columnDefinition = "LONGTEXT")
+    private String originalData;
 
     @PrePersist
     protected void onCreate() {
@@ -70,11 +83,11 @@ public class DataSet {
     }
 
     public String getName() {
-        return name;
+        return datasetName;
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.datasetName = name;
     }
 
     public Integer getRowCount() {
@@ -83,6 +96,14 @@ public class DataSet {
 
     public void setRowCount(Integer rowCount) {
         this.rowCount = rowCount;
+    }
+
+    public Integer getColumnCount() {
+        return columnCount;
+    }
+
+    public void setColumnCount(Integer columnCount) {
+        this.columnCount = columnCount;
     }
 
     public Long getGenerationTimeMs() {
@@ -111,6 +132,22 @@ public class DataSet {
 
     public LocalDateTime getDeletedAt() {
         return deletedAt;
+    }
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
+    }
+
+    public String getOriginalData() {
+        return originalData;
+    }
+
+    public void setOriginalData(String originalData) {
+        this.originalData = originalData;
     }
 
     public void setDeletedAt(LocalDateTime deletedAt) {

@@ -1,20 +1,37 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { SnackbarProvider } from 'notistack';
 import DomainsPage from './DomainsPage';
 import { DomainProvider } from '../context/DomainProvider';
+import { BatchJobsProvider } from '../context/BatchJobsContext';
 import * as domainService from '../services/domainService';
 
 // Mock the domain service
 jest.mock('../services/domainService');
 
+// Mock WebSocketService to avoid real WS connections in tests
+jest.mock('../services/WebSocketService', () => ({
+  onConnect: null,
+  onDisconnect: null,
+  onReconnecting: null,
+  connect: jest.fn(),
+  disconnect: jest.fn(),
+  subscribeToBatch: jest.fn(),
+  unsubscribeFromBatch: jest.fn(),
+}));
+
 const renderDomainsPage = () => {
   return render(
-    <SnackbarProvider>
-      <DomainProvider>
-        <DomainsPage />
-      </DomainProvider>
-    </SnackbarProvider>
+    <MemoryRouter>
+      <SnackbarProvider>
+        <BatchJobsProvider>
+          <DomainProvider>
+            <DomainsPage />
+          </DomainProvider>
+        </BatchJobsProvider>
+      </SnackbarProvider>
+    </MemoryRouter>
   );
 };
 

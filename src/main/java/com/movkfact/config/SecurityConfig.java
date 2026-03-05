@@ -59,7 +59,22 @@ public class SecurityConfig {
                         
                         // Data Sets API endpoints - public for MVP
                         .requestMatchers("/api/data-sets/**").permitAll()
-                        
+
+                        // Preview endpoint - public for MVP (S7.1) — path exact (CORS OPTIONS + POST)
+                        .requestMatchers("/api/datasets/preview").permitAll()
+
+                        // Lexicon API endpoints - public for MVP
+                        .requestMatchers("/api/lexicon/**").permitAll()
+
+                        // Batch Generation API endpoints - public for MVP
+                        .requestMatchers("/api/batch/**").permitAll()
+
+                        // Anonymization API endpoints - public for MVP
+                        .requestMatchers("/api/anonymize/**").permitAll()
+
+                        // WebSocket endpoint - public for MVP (S3.3)
+                        .requestMatchers("/ws/**").permitAll()
+
                         // Swagger/OpenAPI documentation
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()

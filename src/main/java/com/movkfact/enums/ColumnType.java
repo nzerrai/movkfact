@@ -13,6 +13,25 @@ public enum ColumnType {
     GENDER("personal", "Genre"),
     ADDRESS("personal", "Adresse"),
 
+    // Numeric Data
+    INTEGER("numeric", "Nombre entier"),
+    DECIMAL("numeric", "Nombre décimal"),
+    PERCENTAGE("numeric", "Pourcentage"),
+    BOOLEAN("numeric", "Booléen"),
+
+    // Text Data
+    ENUM("text", "Liste de valeurs"),
+    TEXT("text", "Texte libre"),
+    UUID("text", "UUID"),
+    URL("text", "URL"),
+    IP_ADDRESS("text", "Adresse IP"),
+
+    // Geographic Data
+    COUNTRY("geographic", "Pays"),
+    CITY("geographic", "Ville"),
+    COMPANY("geographic", "Entreprise"),
+    ZIP_CODE("geographic", "Code postal"),
+
     // Financial Data
     AMOUNT("financial", "Montant"),
     CURRENCY("financial", "Devise"),

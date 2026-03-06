@@ -64,5 +64,5 @@ case PERCENTAGE: return new PercentageGenerator(columnConfig);
 - [x] `ColumnType` mis à jour
 - [x] `PercentageGenerator` créé
 - [x] `GeneratorFactory` enregistré
-- [ ] Tests unitaires (à ajouter si besoin)
-- [ ] Intégration UI frontend (sélecteur de type — config constraints min/max)
+- [ ] Tests unitaires (a ajouter si besoin)
+- [x] Integration UI frontend : type visible dans le selecteur de colonnes du wizard (columnTypes.js)

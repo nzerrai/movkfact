@@ -38,9 +38,10 @@ Projet de complexité moyenne, domaine technique full-stack web, composants arch
 
 ### Contraintes Techniques et Dépendances
 
-- Technologies imposées : React (front), Spring Boot (back), H2 (DB), MUI (design)
-- Dépendances : Faker.js pour génération, Spring Batch pour lots, Redis pour cache
-- Contraintes : Modularité, extensibilité via plugins, séparation microservices potentielle
+- Technologies imposees : React (front), Spring Boot (back), H2 (dev) / PostgreSQL (prod), MUI (design)
+- Dependances reelles : Spring Batch (lots), Apache Commons CSV, Jackson, Flyway (migrations DB)
+- Contraintes : Modularite, extensibilite via Strategy pattern (GeneratorFactory)
+- Note : Redis et Faker.js mentionnes initialement — non implementes dans l'etat Sprint 8
 
 ### Préoccupations Transversales Identifiées
 
@@ -80,13 +81,12 @@ Application web full-stack
 - **Validation :** Bean Validation pour contraintes métier
 - **Raison :** Standard Spring Boot, support des relations complexes pour Domain/Dataset/Column
 
-### Authentification et Sécurité
-- **Méthode d'authentification :** JWT avec Spring Security
-- **Patterns d'autorisation :** Rôles et permissions
-- **Middleware de sécurité :** Spring Security pour APIs
-- **Chiffrement :** Masquage des données sensibles (cartes de crédit)
-- **Stratégie API :** Validation inputs, conformité OWASP
-- **Raison :** Sécurisé pour APIs REST, stateless, protection contre injections et accès non autorisés
+### Authentification et Securite
+- **Methode d'authentification :** Aucune (mode dev — toutes routes /api/** permises en Sprint 8)
+- **Prevu :** JWT avec Spring Security (non implemente — cible Sprint 10+)
+- **Middleware de securite :** Spring Security configure (SecurityConfig.java) — mode permissif actuel
+- **RGPD :** Module d'anonymisation irreversible livre en Sprint 8 (AnonymizationService)
+- **Strategie API :** Validation inputs via Bean Validation (@Valid), GlobalExceptionHandler
 
 ### API et Communication
 - **Patterns de conception API :** REST avec ressources et HTTP methods
@@ -150,35 +150,89 @@ Application web full-stack
 
 ## Structure du Projet et Limites Architecturales
 
-### Mapping des Exigences aux Composants
+### Mapping des Exigences aux Composants (etat reel — Sprint 8)
 
 **Gestion de domaines :**
-- Controller: DomainController (/api/domains)
-- Service: DomainService (logique métier)
-- Repository: DomainRepository (accès DB)
-- Entity: Domain (JPA)
-- Frontend: DomainList, DomainForm (composants React)
+- Controller: `DomainController` (GET/POST/PUT/DELETE /api/domains)
+- Repository: `DomainRepository` (acces DB, soft-delete)
+- Entity: `Domain` (JPA)
+- Frontend pages: `DomainsPage`, `DatasetsPage`
+- Frontend composants: `DomainTable`, `DomainDatasetsModal`, `BatchGenerationModal`, `BatchHistoryDrawer`
 
-**Génération de données :**
-- Service: DataGeneratorService (moteur génération)
-- Controller: DataController (/api/data)
-- Entity: DataSet, ColumnConfig
-- Frontend: CsvUploader, DataTypeSelector, GenerationForm
+**Generation de donnees :**
+- Service: `DataGeneratorServiceImpl` (moteur generation, Strategy pattern)
+- Controller: `DataGenerationController` (POST /api/domains/{id}/data-sets, GET /api/data-sets/*)
+- Factory: `GeneratorFactory` — dispatche vers les generateurs par ColumnType
+- Entity: `DataSet` (JPA — dataJson LONGTEXT, originalData, version)
+- DTOs: `GenerationRequestDTO`, `ColumnConfigDTO`, `DataSetDTO`
+- Frontend composants: `ManualWizard/` (wizard 4 etapes), `CsvUploadPanel/`, `DataConfigurationPanel/`
+- Frontend pages: `DataViewerPage`
 
-**Interface utilisateur :**
-- Composants: Dashboard, DataViewer, Settings
-- Hooks: useDomains, useDataGeneration
-- Utils: formatters, validators
+**Typologies de generation (ColumnType enum — 20+ types) :**
+- Personnelles : FIRST_NAME, LAST_NAME, EMAIL, PHONE, ADDRESS, GENDER
+- Temporelles : DATE, BIRTH_DATE, TIME, TIMEZONE
+- Financieres : AMOUNT, ACCOUNT_NUMBER, CURRENCY
+- Techniques : UUID, IP_ADDRESS, URL, BOOLEAN
+- Geographiques : CITY, COUNTRY, ZIP_CODE, COMPANY
+- Numeriques : INTEGER, DECIMAL, PERCENTAGE
+- Generiques : TEXT, ENUM
 
-**APIs CRUD :**
-- Controllers: DomainController, DataController
-- Services: CRUD operations
-- DTOs: Request/Response objects
+**Configuration colonnes (batch) :**
+- Controller: `ColumnConfigurationController` (/api/domains/{id}/columns/*)
+- Service: `ColumnConfigurationService`
+- Entity: `ColumnConfiguration` (JPA — domainId, columnName, detectedType)
+- Synchronisation automatique : `DataGenerationController` appelle `saveColumnConfigurations` a chaque creation de dataset
 
-**Sécurité et suivi :**
-- SecurityConfig (Spring Security)
-- ActivityService (tracking)
-- Filters: AuthFilter, LoggingFilter
+**Detection de types CSV :**
+- Controller: `TypeDetectionController`
+- Service: `DataPreviewService`
+
+**Visualisation et export :**
+- Controllers: `DataPreviewController`, `DataExportController`
+- Services: `DataPreviewService`, `DataExportService`
+- Frontend composant: `DataViewer/`
+
+**Edition inline :**
+- Controller: `DataRowEditorController` (/api/data-sets/{id}/rows/*)
+- Service: `DataRowEditorService`
+- Frontend composant: `DataEditor/`
+
+**Generation batch :**
+- Package: `com.movkfact.batch/` (Spring Batch)
+- Controller: `BatchJobController` (POST /api/batch/generate, GET /api/batch/{jobId})
+- Config store: `BatchJobConfigStore` (InMemory entre soumission et execution)
+- Frontend composant: `BatchGenerationModal`, `BatchHistoryDrawer`
+- Temps reel: WebSocket `/ws` — `BatchProgressWebSocketHandler`
+
+**Anonymisation RGPD :**
+- Controller: `AnonymizationController` (/api/anonymize/inspect, /process, /save)
+- Service: `AnonymizationService` (strategies par ColumnType, sel runtime, aucune persistance)
+- DTO: `AnonymizationColumnConfig`
+- Frontend page: `AnonymizationPage` (Stepper 3 etapes)
+
+**Lexique bancaire :**
+- Controller: `LexiconController` (GET /api/lexicon/banking)
+- Entity: `BankingLexiconEntry` (JPA)
+- Flyway: V007__banking_lexicon.sql
+- Frontend: fallback statique `bankingLexicon.js` (dev H2 sans Flyway)
+
+**Suivi d'activite :**
+- Service: `ActivityService`
+- Entity: `Activity`, `ActivityActionType`
+- Repository: `ActivityRepository`
+
+**Securite :**
+- Config: `SecurityConfig` — Spring Security, endpoints publics (pas de JWT implemente)
+- Toutes les routes /api/** sont permises (mode dev sans authentification)
+
+**Interface utilisateur — Pages :**
+- `Dashboard` — statistiques globales
+- `DomainsPage` — gestion domaines
+- `DatasetsPage` — vue tous les datasets
+- `DataViewerPage` — visualisation + edition inline
+- `ApiReferencePage` — reference API interactive (execute, body JSON)
+- `AnonymizationPage` — module RGPD
+- `SettingsPage` — parametres application
 
 ### Structure de Répertoires Complète
 

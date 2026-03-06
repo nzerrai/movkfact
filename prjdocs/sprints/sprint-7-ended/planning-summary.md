@@ -106,8 +106,8 @@ Tests croisés + Smoke Docker + Buffer + Validation Quinn
 - [Spec S8.2](../../epic-8-domain-enrichment/8-2-frontend-domain-stats.md)
 - [Spec S9.1](../../epic-9-advanced-api/9-1-api-row-filtering.md)
 - [Spec S3.5b](../../epic-10-quality-gate/s3-5b-docker-documentation.md)
-- [Sprint Status](../sprint-status.yaml)
-- [PRD](../../planning-artifacts/prd.md)
+- [Backlog](../backlog.md)
+- [PRD](../../planning/prd.md)
 
 ---
 

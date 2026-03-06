@@ -1,140 +1,174 @@
 ---
 project: movkfact
 author: Nouredine
-date: 26 février 2026
-version: 1.0
+date: 06 mars 2026
+version: 2.0
 status: active
+lastUpdated: 06 mars 2026
 ---
 
-# Product Backlog - Movkfact
+# Product Backlog — Movkfact
 
 ## Vue d'Ensemble
 
-Le backlog complet pour le projet movkfact, organisé en 3 épics majeurs alignés sur les phases de livraison du PRD.
+Backlog complet pour le projet movkfact, refletant l'etat reel au 06/03/2026 apres 8 sprints livres.
 
 ---
 
-## EPIC 1 : Foundation & Core MVP
+## Epics livrees
 
-**Objectif :** Établir les fondations et délivrer le MVP avec gestion de domaines, interface basique et APIs CRUD.
-
-**Alignement PRD :** Exigences 2.1, 2.3, 2.5 (partiellement), 2.6
-
-**Sprints :** Sprint 1, Sprint 2 (partiellement)
-
-### Détail Epic
-
-- Créer infrastructure backend Spring Boot
-- Créer interface frontend React
-- Implémenter gestion des domaines
-- Implémenter APIs CRUD basiques
-- Implémenter suivi d'activité
-
----
-
-## EPIC 2 : Data Generation Engine
-
-**Objectif :** Implémenter le moteur de génération de données avec 3 typologies de base.
-
-**Alignement PRD :** Exigences 2.2 (partiellement avec MVP limitée à 3 typologies)
-
-**Sprints :** Sprint 2, Sprint 3 (partiellement)
-
-### Détail Epic
-
-- Implémenter DataGeneratorService
-- Implémenter 3 typologies : Personnelles, Financières, Temporelles
-- Implémenter configuration par colonnes
-- Implémenter sortie JSON
-- Implémenter détection intelligente de types
+| Epic | Titre | Sprints | Statut |
+|------|-------|---------|--------|
+| Epic 1 | Foundation & Core MVP | S1, S2 | Done |
+| Epic 2 | Data Generation Engine | S2, S3 | Done |
+| Epic 3 | Advanced Features (Batch, WebSocket) | S3, S4 | Done |
+| Epic 4 | PostgreSQL Migration | S4 | Done |
+| Epic 5 | Extended Data Types (PERCENTAGE, ENUM) | S5 (skipped) + S8 | Done |
+| Epic 6 | Data Editor (edition inline) | S6 | Done |
+| Epic 7 | Manual Wizard (creation sans CSV) | S6 | Done |
+| Epic 8 | Domain Enrichment (stats agregees) | S7 | Backlog |
+| Epic 9 | Advanced API (filtrage rowIds + cols) | S7 | Backlog |
+| Epic 10 | Quality Gate (Docker, tests, docs) | S7 | Backlog |
+| Epic 11 | Anonymisation RGPD | S8 | Done |
 
 ---
 
-## EPIC 3 : Advanced Features & Scalability
+## EPIC 1 — Foundation & Core MVP
 
-**Objectif :** Ajouter génération par lots, APIs avancées, plugins et scalabilité.
+**Objectif :** Infrastructure backend/frontend, gestion CRUD des domaines.
+**Sprints :** 1, 2 | **Statut :** Done
 
-**Alignement PRD :** Exigences 2.4, 2.7, 3.4 (microservices), Section 4 (Phase 2/3)
-
-**Sprints :** Sprint 3, Phases futures
-
-### Détail Epic
-
-- Implémenter Spring Batch pour génération par lots
-- Implémenter WebSockets pour notifications
-- Implémenter APIs avancées (extraction par critères)
-- Système de plugins pour nouvelles typologies
-- Préparation microservices
+- Infrastructure Spring Boot + React + H2
+- Gestion domaines (CRUD)
+- Interface basique, Sidebar, Dashboard
+- APIs REST standards
 
 ---
 
-# SPRINT 1 : Foundation & Domain Management (2 semaines)
+## EPIC 2 — Data Generation Engine
 
-**Objectif :** Établir l'infrastructure et permettre la gestion de domaines.
+**Objectif :** Moteur de generation, typologies, configuration par colonnes, export JSON/CSV.
+**Sprints :** 2, 3 | **Statut :** Done
 
-**Livrables :** Backend API, Frontend basique, Gestion domaines opérationnelle
-
-**Nombre de stories :** 5
-
-**Points d'effort :** 21 points
-
-**Alignement :** Phase 1 PRD (Infrastructure + Gestion domaines)
-
-**Dates :** 03/03/2026 - 16/03/2026
-
-Voir [Sprint 1 Details](sprint-1-2026-03-03/kickoff-summary.md)
+- DataGeneratorService + GeneratorFactory (Strategy pattern)
+- Typologies : Personnelles, Financieres, Temporelles, Techniques, Geographiques
+- Upload CSV + detection de types
+- Configuration colonnes, export JSON/CSV
+- Suivi d'activite + versioning + reset
 
 ---
 
-# SPRINT 2 : Data Generation & Configuration (2 semaines)
+## EPIC 3 — Advanced Features & Scalability
 
-**Objectif :** Implémenter le cœur du produit - génération de données configurables.
+**Objectif :** Generation par lots (Spring Batch), WebSockets temps reel, notifications.
+**Sprints :** 3, 4 | **Statut :** Done
 
-**Livrables :** Moteur génération, 3 typologies, Interface configuration, APIs complètes
-
-**Nombre de stories :** 6
-
-**Points d'effort :** 34 points
-
-**Alignement :** Phase 1 PRD (Génération + IHM)
-
-**Dates :** 17/03/2026 - 30/03/2026
-
-Voir [Sprint 2 Details](sprint-2-2026-03-17/kickoff-summary.md)
+- Spring Batch : batch multi-datasets en parallele (4 workers)
+- BatchGenerationModal + BatchHistoryDrawer
+- WebSocket notifications progression
+- Nommage custom des datasets
 
 ---
 
-# SPRINT 3 : Activity Tracking & Batch Generation (2 semaines)
+## EPIC 4 — PostgreSQL Migration
 
-**Objectif :** Compléter le MVP avec suivi d'activité et génération par lots.
+**Objectif :** Migration H2 vers PostgreSQL en production avec Flyway.
+**Sprint :** 4 | **Statut :** Done
 
-**Livrables :** Suivi d'activité opérationnel, Batch jobs, Notifications, Tests complets
-
-**Nombre de stories :** 5
-
-**Points d'effort :** 28 points
-
-**Alignement :** Phase 1 PRD (Suivi) + Début Phase 2 (Lots)
-
-**Dates :** 31/03/2026 - 13/04/2026
-
-Voir [Sprint 3 Details](sprint-3-2026-03-31/kickoff-summary.md)
+- Profil application-prod.yml avec PostgreSQL
+- Migrations Flyway V001–V007
+- docker-compose.yml avec stack complete
 
 ---
 
-## Résumé du Backlog
+## EPIC 5 — Extended Data Types
 
-| Métrique | Valeur |
+**Objectif :** Enrichissement du referentiel de types disponibles.
+**Sprints :** 5 (skipped) + 8 | **Statut :** Done
+
+- PERCENTAGE : float [0.0, 100.0], 2 decimales, contraintes min/max
+- ENUM : liste de valeurs configurables par l'utilisateur
+- Banking lexicon autocomplete dans le wizard
+
+---
+
+## EPIC 6 — Data Editor
+
+**Objectif :** Edition inline des cellules d'un dataset depuis le Data Viewer.
+**Sprint :** 6 | **Statut :** Done
+
+- DataRowEditorController + DataRowEditorService
+- Composant DataEditor (edition in-place, sauvegarde)
+
+---
+
+## EPIC 7 — Manual Wizard
+
+**Objectif :** Creation de datasets sans upload CSV, directement depuis l'interface.
+**Sprint :** 6 | **Statut :** Done
+
+- Wizard 4 etapes (domaine, colonnes, nb lignes, generation)
+- Autocomplete noms colonnes (lexique bancaire)
+- Contraintes dynamiques par type (DynamicConstraintsPanel)
+
+---
+
+## EPIC 8 — Domain Enrichment
+
+**Objectif :** Statistiques agregees visibles dans la liste des domaines.
+**Sprint :** 7 | **Statut :** Backlog (non demarre)
+
+- S8.1 : Backend agregats (nb datasets, total lignes, statuts)
+- S8.2 : Frontend enrichissement DomainTable + modal stats
+
+---
+
+## EPIC 9 — Advanced API
+
+**Objectif :** Acces granulaire aux donnees pour pipelines CI/CD.
+**Sprint :** 7 | **Statut :** Backlog (non demarre)
+
+- S9.1 : GET /api/data-sets/{id}/rows?rowIds=&cols= filtrage avance
+- S9.2 : API Reference Page (interactive) — Done S8
+
+---
+
+## EPIC 10 — Quality Gate
+
+**Objectif :** Deploiement Docker production-ready, documentation complete.
+**Sprint :** 7 | **Statut :** Backlog (non demarre)
+
+- S3.5b : docker-compose up --build en < 2min
+- README.md complet avec instructions
+
+---
+
+## EPIC 11 — Anonymisation RGPD
+
+**Objectif :** Module d'anonymisation irreversible de fichiers CSV/JSON avec sauvegarde en dataset.
+**Sprint :** 8 | **Statut :** Done
+
+- S8.2 : Anonymisation RGPD fichiers (strategies par ColumnType, donnees synthetiques)
+- S8.3 : Sauvegarde du resultat en dataset par domaine
+- Voir spec : [Epic 11](../epics/epic-11-anonymisation-rgpd/11-1-anonymisation-rgpd.md)
+
+---
+
+## Statut global au 06/03/2026
+
+| Metrique | Valeur |
 |----------|--------|
-| Épics | 3 |
-| Sprints | 3 |
-| Total Stories | 16 |
-| Total Points | 83 |
-| Durée estimée | 6 semaines |
-| État | À démarrer |
+| Sprints livres | 8 (S1 a S8) |
+| Epics completes | 7 (1, 2, 3, 4, 5, 6, 7, 11) |
+| Epics backlog | 3 (8, 9, 10) |
+| Stories livrees estimees | 40+ |
+| FRs PRD couverts | 18/20 (FR-002/003 restants — Epic 8) |
+| Statut deploiement | Dev : H2 in-memory | Prod-ready : PostgreSQL + Docker |
 
-## Alignement avec Phases de Livraison PRD
+## Prochains sprints possibles
 
-- **Phase 1 (Q1)** : Sprints 1-3 (MVP complet)
-- **Phase 2 (Q2)** : EPIC 3, stockage plugins
-- **Phase 3 (Q3+)** : Microservices, IA, modes avancés
+| Sprint | Contenu suggere |
+|--------|-----------------|
+| Sprint 9 | Epics 8 + 9 + 10 (enrichissement domaines, API filtrage, Docker) |
+| Sprint 10 | Authentification JWT, roles utilisateurs, multi-tenancy |
+| Sprint 11 | Performance (Redis cache), IA detection types, plugins |

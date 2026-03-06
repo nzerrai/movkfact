@@ -142,4 +142,4 @@ Dataset disponible dans MockFact
 - Code : `src/main/java/com/movkfact/service/AnonymizationService.java`
 - Code : `src/main/java/com/movkfact/controller/AnonymizationController.java`
 - Epic : [Epic 11 Anonymisation RGPD](../epics/epic-11-anonymisation-rgpd/11-1-anonymisation-rgpd.md)
-- Sprint : [Sprint 8 Stories S8.2 + S8.3](../sprints/sprint-8-started/stories.md)
+- Sprint : [Sprint 8 Stories S8.2 + S8.3](../sprints/sprint-8-ended/stories.md)

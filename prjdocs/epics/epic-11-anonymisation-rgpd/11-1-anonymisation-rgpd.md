@@ -105,8 +105,8 @@ Garanties RGPD implementees :
 
 ## References
 
-- Sprint : [Sprint 8 Kickoff](../../sprints/sprint-8-started/kickoff.md)
-- Stories : [S8.2 + S8.3](../../sprints/sprint-8-started/stories.md)
+- Sprint : [Sprint 8 Kickoff](../../sprints/sprint-8-ended/kickoff.md)
+- Stories : [S8.2 + S8.3](../../sprints/sprint-8-ended/stories.md)
 - Design RGPD : [rgpd-anonymization-design.md](../../planning/rgpd-anonymization-design.md)
 - Code backend : `src/main/java/com/movkfact/service/AnonymizationService.java`
 - Code backend : `src/main/java/com/movkfact/controller/AnonymizationController.java`

@@ -1,0 +1,87 @@
+# generated: 2026-03-08
+# project: movkfact
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: prjdocs/implementation-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in implementation-artifacts/
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epics 1-5 : livrés avant mise en place de la structure BMAD (pas de story files)
+# - Epic 9 : partiellement livré (S9.2 done en Sprint 8 comme S8.5)
+# - Epic 8 : sprint 9 cible — stories 8-1 et 8-2 prêtes pour dev
+
+generated: "2026-03-08"
+project: movkfact
+project_key: NOKEY
+tracking_system: file-system
+story_location: "prjdocs/implementation-artifacts"
+
+development_status:
+
+  # ── ÉPICS LIVRÉS AVANT STRUCTURE BMAD ──────────────────────
+  epic-1: done                              # Foundation & Core MVP (S1-S2)
+  epic-1-retrospective: optional
+
+  epic-2: done                              # Data Generation Engine (S2-S3)
+  epic-2-retrospective: optional
+
+  epic-3: done                              # Advanced Features & Batch (S3-S4)
+  epic-3-retrospective: optional
+
+  epic-4: done                              # PostgreSQL Migration (S4)
+  epic-4-retrospective: optional
+
+  epic-5: done                              # Extended Data Types PERCENTAGE+ENUM (S8)
+  epic-5-retrospective: optional
+
+  # ── EPIC 6 — Data Editor ──────────────────────────────────
+  epic-6: done
+  6-1-backend-row-editor-api: done
+  6-2-frontend-data-editor-inline: done
+  epic-6-retrospective: optional
+
+  # ── EPIC 7 — Manual Wizard ───────────────────────────────
+  epic-7: done
+  7-1-backend-wizard-support: done
+  7-2-frontend-wizard-4-steps: done
+  epic-7-retrospective: done                # retro effectuée 2026-03-04
+
+  # ── EPIC 8 — Domain Enrichment (Sprint 9 cible) ─────────
+  epic-8: in-progress
+  8-1-backend-domain-aggregates: ready-for-dev
+  8-2-frontend-domain-stats: ready-for-dev
+  epic-8-retrospective: optional
+
+  # ── EPIC 9 — Advanced API ───────────────────────────────
+  epic-9: in-progress
+  9-1-api-row-filtering: backlog
+  9-2-api-reference-page: done             # livré Sprint 8 (S8.5)
+  epic-9-retrospective: optional
+
+  # ── EPIC 10 — Quality Gate ──────────────────────────────
+  epic-10: backlog
+  10-1-docker-documentation: backlog
+  epic-10-retrospective: optional
+
+  # ── EPIC 11 — Anonymisation RGPD ────────────────────────
+  epic-11: done
+  11-1-anonymisation-rgpd: done
+  epic-11-retrospective: optional

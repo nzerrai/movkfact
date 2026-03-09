@@ -6,9 +6,9 @@ import com.movkfact.entity.Domain;
 import com.movkfact.exception.EntityNotFoundException;
 import com.movkfact.repository.DomainRepository;
 import com.movkfact.response.ApiResponse;
+import com.movkfact.service.DomainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -40,9 +40,12 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/domains")
 public class DomainController {
-    
+
     @Autowired
     private DomainRepository domainRepository;
+
+    @Autowired
+    private DomainService domainService;
     
     /**
      * POST /api/domains - Create new domain
@@ -79,38 +82,22 @@ public class DomainController {
     }
     
     /**
-     * GET /api/domains - List all active (non-deleted) domains
-     * 
-     * Optional pagination via query parameters:
+     * GET /api/domains - List all active (non-deleted) domains with aggregated stats (FR-002).
+     * Returns datasetCount, totalRows, and statuses for each domain.
+     *
      * @param offset starting index (default 0)
-     * @param limit maximum items to return (default 100)
-     * @return 200 OK with list of domains
+     * @param limit  maximum items to return (default 100)
+     * @return 200 OK with enriched list of domains
      */
     @GetMapping
     public ResponseEntity<ApiResponse<List<DomainResponseDTO>>> getAllDomains(
             @RequestParam(required = false, defaultValue = "0") Integer offset,
             @RequestParam(required = false, defaultValue = "100") Integer limit) {
-        
-        // Fetch all active domains
-        List<Domain> allDomains = domainRepository.findByDeletedAtIsNull();
-        
-        // Apply simple pagination
-        int end = Math.min(offset + limit, allDomains.size());
-        List<Domain> paginated = allDomains.subList(
-                Math.min(offset, allDomains.size()),
-                end
-        );
-        
-        // Map to response DTOs
-        List<DomainResponseDTO> dtos = paginated.stream()
-                .map(this::mapToResponseDTO)
-                .collect(Collectors.toList());
-        
-        return ResponseEntity.ok(
-                ApiResponse.success(dtos, "Domains retrieved successfully")
-        );
+
+        List<DomainResponseDTO> dtos = domainService.getDomainsWithStats(offset, limit);
+        return ResponseEntity.ok(ApiResponse.success(dtos, "Domains retrieved successfully"));
     }
-    
+
     /**
      * GET /api/domains/{id} - Get single domain by ID
      * 

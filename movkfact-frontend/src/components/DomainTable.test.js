@@ -1,12 +1,32 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { DomainTable } from './DomainTable';
 
+const theme = createTheme();
+const renderWithTheme = (ui) =>
+  render(<ThemeProvider theme={theme}>{ui}</ThemeProvider>);
+
 const mockDomains = [
-  { id: 1, name: 'Domain1', description: 'Description 1', createdAt: '2026-01-01', updatedAt: '2026-01-15' },
-  { id: 2, name: 'Domain2', description: 'Description 2', createdAt: '2026-01-02', updatedAt: '2026-01-16' },
-  { id: 3, name: 'Domain3', description: 'Description 3', createdAt: '2026-01-03', updatedAt: '2026-01-17' },
+  {
+    id: 1, name: 'Domain1', description: 'Description 1',
+    createdAt: '2026-01-01', updatedAt: '2026-01-15',
+    datasetCount: 3, totalRows: 1500,
+    statuses: { downloaded: true, modified: false, viewed: true },
+  },
+  {
+    id: 2, name: 'Domain2', description: 'Description 2',
+    createdAt: '2026-01-02', updatedAt: '2026-01-16',
+    datasetCount: 0, totalRows: 0,
+    statuses: { downloaded: false, modified: false, viewed: false },
+  },
+  {
+    id: 3, name: 'Domain3', description: 'Description 3',
+    createdAt: '2026-01-03', updatedAt: '2026-01-17',
+    datasetCount: 1, totalRows: 2500000,
+    statuses: { downloaded: false, modified: true, viewed: false },
+  },
 ];
 
 const mockOnEdit = jest.fn();
@@ -142,5 +162,58 @@ describe('DomainTable Component', () => {
     // View Datasets, Upload CSV, Edit, Delete buttons should exist
     expect(screen.getAllByRole('button', { name: /view uploaded datasets/i })).toHaveLength(3);
     expect(screen.getAllByRole('button', { name: /upload csv/i })).toHaveLength(3);
+  });
+
+  // ── Tests colonnes enrichies (FR-002) ──
+
+  it('affiche le header "Datasets" dans le tableau', () => {
+    renderWithTheme(
+      <DomainTable domains={mockDomains} loading={false} searchText="" />
+    );
+    expect(screen.getByText('Datasets')).toBeInTheDocument();
+  });
+
+  it('affiche le header "Statuts" dans le tableau', () => {
+    renderWithTheme(
+      <DomainTable domains={mockDomains} loading={false} searchText="" />
+    );
+    expect(screen.getByText('Statuts')).toBeInTheDocument();
+  });
+
+  it('affiche le chip avec le datasetCount pour chaque domaine', () => {
+    renderWithTheme(
+      <DomainTable domains={[mockDomains[0]]} loading={false} searchText="" />
+    );
+    expect(screen.getByText('3')).toBeInTheDocument(); // datasetCount=3
+  });
+
+  it('affiche le badge "Téléchargé" quand downloaded=true', () => {
+    renderWithTheme(
+      <DomainTable domains={[mockDomains[0]]} loading={false} searchText="" />
+    );
+    expect(screen.getByText('Téléchargé')).toBeInTheDocument();
+  });
+
+  it('affiche le badge "Nouveau" quand tous statuts false', () => {
+    renderWithTheme(
+      <DomainTable domains={[mockDomains[1]]} loading={false} searchText="" />
+    );
+    expect(screen.getByText('Nouveau')).toBeInTheDocument();
+  });
+
+  it('affiche le badge "Modifié" quand modified=true', () => {
+    renderWithTheme(
+      <DomainTable domains={[mockDomains[2]]} loading={false} searchText="" />
+    );
+    expect(screen.getByText('Modifié')).toBeInTheDocument();
+  });
+
+  it('affiche le skeleton quand loading=true', () => {
+    const { container } = renderWithTheme(
+      <DomainTable domains={[]} loading={true} searchText="" />
+    );
+    // Skeleton rows render — header columns present
+    expect(screen.getByText('Datasets')).toBeInTheDocument();
+    expect(screen.getByText('Statuts')).toBeInTheDocument();
   });
 });

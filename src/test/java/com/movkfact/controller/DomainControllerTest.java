@@ -2,7 +2,10 @@ package com.movkfact.controller;
 
 import com.movkfact.dto.DomainCreateDTO;
 import com.movkfact.dto.DomainResponseDTO;
+import com.movkfact.entity.DataSet;
 import com.movkfact.entity.Domain;
+import com.movkfact.repository.ActivityRepository;
+import com.movkfact.repository.DataSetRepository;
 import com.movkfact.repository.DomainRepository;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -17,6 +20,7 @@ import java.util.List;
 
 import static io.restassured.RestAssured.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.hamcrest.Matchers.*;
 
 /**
  * Integration test suite for DomainController.
@@ -39,14 +43,20 @@ public class DomainControllerTest {
     
     @Autowired
     private DomainRepository domainRepository;
-    
+
+    @Autowired
+    private DataSetRepository dataSetRepository;
+
+    @Autowired
+    private ActivityRepository activityRepository;
+
     @BeforeEach
     void setup() {
-        // Configure RestAssured baseURI
         RestAssured.baseURI = "http://localhost";
         RestAssured.port = port;
-        
-        // Clear all domains before each test
+
+        activityRepository.deleteAll();
+        dataSetRepository.deleteAll();
         domainRepository.deleteAll();
     }
     
@@ -315,6 +325,51 @@ public class DomainControllerTest {
                 .body("data.name", org.hamcrest.Matchers.containsInAnyOrder("Finance", "HR"));
     }
     
+    // ========== Enriched stats Tests (FR-002) ==========
+
+    @Test
+    void testGetDomainsWithStats_noDatasets_returnsZeroStats() {
+        domainRepository.save(new Domain("Finance", "Financial data"));
+
+        given()
+            .when().get("/api/domains")
+            .then().statusCode(200)
+            .body("data[0].datasetCount", equalTo(0))
+            .body("data[0].totalRows",    equalTo(0))
+            .body("data[0].statuses.downloaded", equalTo(false))
+            .body("data[0].statuses.modified",   equalTo(false))
+            .body("data[0].statuses.viewed",     equalTo(false));
+    }
+
+    @Test
+    void testGetDomainsWithStats_twoDomains_threeDatasets_aggregatesCorrectly() {
+        Domain d1 = domainRepository.save(new Domain("D1", "desc1"));
+        Domain d2 = domainRepository.save(new Domain("D2", "desc2"));
+
+        DataSet ds1 = new DataSet(); ds1.setDomainId(d1.getId()); ds1.setName("ds1");
+        ds1.setRowCount(300); ds1.setGenerationTimeMs(10L); ds1.setDataJson("[]");
+        dataSetRepository.save(ds1);
+
+        DataSet ds2 = new DataSet(); ds2.setDomainId(d1.getId()); ds2.setName("ds2");
+        ds2.setRowCount(700); ds2.setGenerationTimeMs(10L); ds2.setDataJson("[]");
+        dataSetRepository.save(ds2);
+
+        DataSet ds3 = new DataSet(); ds3.setDomainId(d2.getId()); ds3.setName("ds3");
+        ds3.setRowCount(500); ds3.setGenerationTimeMs(10L); ds3.setDataJson("[]");
+        dataSetRepository.save(ds3);
+
+        given()
+            .when().get("/api/domains")
+            .then().statusCode(200)
+            .body("data.size()", equalTo(2))
+            // D1: 2 datasets, 1000 rows
+            .body("data.find { it.name == 'D1' }.datasetCount", equalTo(2))
+            .body("data.find { it.name == 'D1' }.totalRows",    equalTo(1000))
+            // D2: 1 dataset, 500 rows
+            .body("data.find { it.name == 'D2' }.datasetCount", equalTo(1))
+            .body("data.find { it.name == 'D2' }.totalRows",    equalTo(500));
+    }
+
     @Test
     void testGetDeletedDomainByIdNotFound() {
         // Create and soft delete domain

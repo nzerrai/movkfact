@@ -120,10 +120,11 @@ public class AddressValidator {
                 addressScore += 2;
             }
             
-            // Check for postal/zip codes
-            if (ZIP_REGEX.matcher(trimmed).find() ||
+            // Check for postal/zip codes — skip purely numeric values (amounts, IDs) to avoid false positives
+            boolean hasPotentialAddressContent = lowerCase.matches(".*[a-zA-Z,].*");
+            if (hasPotentialAddressContent && (ZIP_REGEX.matcher(trimmed).find() ||
                 POSTAL_REGEX.matcher(trimmed).find() ||
-                EU_POSTAL_REGEX.matcher(trimmed).find()) {
+                EU_POSTAL_REGEX.matcher(trimmed).find())) {
                 addressScore += 3;
             }
             

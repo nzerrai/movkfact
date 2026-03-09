@@ -1,6 +1,6 @@
 # Story 8.1: Backend Agrégats par domaine
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -35,32 +35,32 @@ Afin d'évaluer rapidement l'utilisation de mes domaines sans ouvrir chacun indi
 
 ## Tasks / Subtasks
 
-- [ ] Créer `DomainStatusDTO.java` (AC: 1, 2)
-  - [ ] Champs : `boolean downloaded`, `boolean modified`, `boolean viewed`
-  - [ ] Constructeur all-args + no-arg + getters/setters
-- [ ] Étendre `DomainResponseDTO.java` (AC: 1)
-  - [ ] Ajouter `Integer datasetCount`, `Long totalRows`, `DomainStatusDTO statuses`
-  - [ ] Mettre à jour le constructeur existant (ou ajouter un builder)
-- [ ] Créer `DataSetSummaryDTO.java` (AC: 2) — DTO pour la liste des datasets enrichie
-  - [ ] Champs existants : `id`, `datasetName`, `rowCount`, `columnCount`, `createdAt`, `updatedAt`
-  - [ ] Nouveaux champs : `DomainStatusDTO status`, `LocalDateTime lastActivity`
-- [ ] Créer `DomainService.java` (AC: 1, 2, 3)
-  - [ ] Injection : `DomainRepository`, `DataSetRepository`, `ActivityRepository`
-  - [ ] Méthode `getDomainsWithStats(int offset, int limit)` → `List<DomainResponseDTO>`
-  - [ ] Méthode `getDatasetsByDomainWithStats(Long domainId)` → `List<DataSetSummaryDTO>`
-  - [ ] Logique anti-N+1 : charger activities en une requête via `findByDataSetIdIn()`
-- [ ] Ajouter `findByDataSetIdIn(List<Long> ids)` dans `ActivityRepository` (AC: 3)
-  - [ ] Spring Data dérive automatiquement depuis le nom de méthode
-- [ ] Modifier `DomainController` (AC: 1, 2)
-  - [ ] Injecter `DomainService` (remplace appels directs à `DomainRepository`)
-  - [ ] `getAllDomains()` → déléguer à `domainService.getDomainsWithStats()`
-  - [ ] Ajouter `GET /api/domains/{domainId}/data-sets` → `domainService.getDatasetsByDomainWithStats()`
-- [ ] Ajouter migration Flyway V008 si index manquant (AC: 3)
-  - [ ] Vérifier si `idx_activity_dataset_action` existe dans V004
-  - [ ] Si absent : `CREATE INDEX IF NOT EXISTS idx_activity_action ON activity(dataset_id, action)`
-- [ ] Écrire tests (AC: 4)
-  - [ ] `DomainServiceTest.java` — mock repositories, tester les 3 statuts
-  - [ ] `DomainControllerIT.java` — intégration GET /api/domains enrichi
+- [x] Créer `DomainStatusDTO.java` (AC: 1, 2)
+  - [x] Champs : `boolean downloaded`, `boolean modified`, `boolean viewed`
+  - [x] Constructeur all-args + no-arg + getters/setters
+- [x] Étendre `DomainResponseDTO.java` (AC: 1)
+  - [x] Ajouter `Integer datasetCount`, `Long totalRows`, `DomainStatusDTO statuses`
+  - [x] Mettre à jour le constructeur existant (ou ajouter un builder)
+- [x] Créer `DataSetSummaryDTO.java` (AC: 2) — DTO pour la liste des datasets enrichie
+  - [x] Champs existants : `id`, `datasetName`, `rowCount`, `columnCount`, `createdAt`, `updatedAt`
+  - [x] Nouveaux champs : `DomainStatusDTO status`, `LocalDateTime lastActivity`
+- [x] Créer `DomainService.java` (AC: 1, 2, 3)
+  - [x] Injection : `DomainRepository`, `DataSetRepository`, `ActivityRepository`
+  - [x] Méthode `getDomainsWithStats(int offset, int limit)` → `List<DomainResponseDTO>`
+  - [x] Méthode `getDatasetsByDomainWithStats(Long domainId)` → `List<DataSetSummaryDTO>`
+  - [x] Logique anti-N+1 : charger activities en une requête via `findByDataSetIdIn()`
+- [x] Ajouter `findByDataSetIdIn(List<Long> ids)` dans `ActivityRepository` (AC: 3)
+  - [x] Spring Data dérive automatiquement depuis le nom de méthode
+- [x] Modifier `DomainController` (AC: 1, 2)
+  - [x] Injecter `DomainService` (remplace appels directs à `DomainRepository`)
+  - [x] `getAllDomains()` → déléguer à `domainService.getDomainsWithStats()`
+  - [x] Endpoint `/data-sets` migré dans `DataGenerationController` → délègue à `domainService.getDatasetsByDomainWithStats()`
+- [x] Ajouter migration Flyway V008 si index manquant (AC: 3)
+  - [x] Vérifier si `idx_activity_dataset_action` existe dans V004
+  - [x] `CREATE INDEX IF NOT EXISTS idx_activity_dataset_action ON activity(dataset_id, action)`
+- [x] Écrire tests (AC: 4)
+  - [x] `DomainServiceTest.java` — 12 tests unitaires, mock repositories, 3 statuts, pagination, tri
+  - [x] `DataGenerationControllerTests` — 3 tests intégration GET /api/domains/{id}/data-sets mis à jour
 
 ## Dev Notes
 

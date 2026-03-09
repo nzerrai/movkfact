@@ -10,8 +10,9 @@ import {
   CardContent,
   Box,
   Button,
+  Chip,
   Grid,
-  CircularProgress,
+  Skeleton,
   Typography,
   useMediaQuery,
   IconButton,
@@ -23,6 +24,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import StorageIcon from '@mui/icons-material/Storage';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import StatusBadge from './StatusBadge';
+import { formatRowCount } from '../utils/formatters';
 
 /**
  * DomainTable component - displays domains as table on desktop, cards on mobile
@@ -57,9 +60,32 @@ export const DomainTable = ({
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-        <CircularProgress />
-      </Box>
+      <TableContainer component={Card}>
+        <Table>
+          <TableHead>
+            <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+              <TableCell><strong>Nom</strong></TableCell>
+              <TableCell><strong>Description</strong></TableCell>
+              <TableCell><strong>Datasets</strong></TableCell>
+              {!isMobile && <TableCell><strong>Lignes totales</strong></TableCell>}
+              <TableCell><strong>Statuts</strong></TableCell>
+              <TableCell align="center"><strong>Actions</strong></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {[1, 2, 3].map((i) => (
+              <TableRow key={i}>
+                <TableCell><Skeleton variant="text" width={120} /></TableCell>
+                <TableCell><Skeleton variant="text" width={180} /></TableCell>
+                <TableCell><Skeleton variant="rectangular" width={40} height={24} /></TableCell>
+                {!isMobile && <TableCell><Skeleton variant="text" width={60} /></TableCell>}
+                <TableCell><Skeleton variant="rectangular" width={80} height={24} /></TableCell>
+                <TableCell align="center"><Skeleton variant="rectangular" width={120} height={32} /></TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
     );
   }
 
@@ -158,10 +184,11 @@ export const DomainTable = ({
       <Table>
         <TableHead>
           <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-            <TableCell><strong>Name</strong></TableCell>
+            <TableCell><strong>Nom</strong></TableCell>
             <TableCell><strong>Description</strong></TableCell>
-            <TableCell><strong>Created</strong></TableCell>
-            <TableCell><strong>Updated</strong></TableCell>
+            <TableCell><strong>Datasets</strong></TableCell>
+            {!isMobile && <TableCell><strong>Lignes totales</strong></TableCell>}
+            <TableCell><strong>Statuts</strong></TableCell>
             <TableCell align="center"><strong>Actions</strong></TableCell>
           </TableRow>
         </TableHead>
@@ -172,8 +199,24 @@ export const DomainTable = ({
               <TableCell>
                 {domain.description ? domain.description.substring(0, 50) + '...' : 'N/A'}
               </TableCell>
-              <TableCell>{formatDate(domain.createdAt)}</TableCell>
-              <TableCell>{formatDate(domain.updatedAt)}</TableCell>
+              <TableCell>
+                <Chip
+                  label={domain.datasetCount ?? 0}
+                  size="small"
+                  color="primary"
+                  variant="outlined"
+                />
+              </TableCell>
+              {!isMobile && (
+                <TableCell>{formatRowCount(domain.totalRows)}</TableCell>
+              )}
+              <TableCell>
+                <StatusBadge
+                  downloaded={domain.statuses?.downloaded ?? false}
+                  modified={domain.statuses?.modified ?? false}
+                  viewed={domain.statuses?.viewed ?? false}
+                />
+              </TableCell>
               <TableCell align="center">
                 <Tooltip title="Créer un dataset">
                   <IconButton

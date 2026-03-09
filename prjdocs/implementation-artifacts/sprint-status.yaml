@@ -66,8 +66,8 @@ development_status:
 
   # ── EPIC 8 — Domain Enrichment (Sprint 9 cible) ─────────
   epic-8: in-progress
-  8-1-backend-domain-aggregates: ready-for-dev
-  8-2-frontend-domain-stats: ready-for-dev
+  8-1-backend-domain-aggregates: review
+  8-2-frontend-domain-stats: review
   epic-8-retrospective: optional
 
   # ── EPIC 9 — Advanced API ───────────────────────────────

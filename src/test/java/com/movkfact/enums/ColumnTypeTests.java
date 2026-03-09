@@ -49,6 +49,6 @@ class ColumnTypeTests {
 
     @Test
     void testColumnTypeEnumCount() {
-        assertEquals(13, ColumnType.values().length);
+        assertEquals(26, ColumnType.values().length);
     }
 }

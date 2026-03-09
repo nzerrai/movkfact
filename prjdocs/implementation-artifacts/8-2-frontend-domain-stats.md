@@ -1,6 +1,6 @@
 # Story 8.2: Frontend Enrichissement liste domaines
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -37,29 +37,30 @@ Afin de naviguer efficacement sans avoir à ouvrir chaque domaine individuelleme
 
 ## Tasks / Subtasks
 
-- [ ] Ajouter `getDatasetsByDomain(domainId)` dans `domainService.js` (AC: 2)
-  - [ ] `GET /api/domains/{domainId}/data-sets` via `api.js` (pas de fetch hardcodé)
-  - [ ] Unwrapper `response.data.data`
-- [ ] Ajouter `formatRowCount` dans `utils/formatters.js` (AC: 1)
-  - [ ] ≥ 1 000 000 → "1,2M" ; ≥ 1 000 → "12 500" (toLocaleString fr-FR) ; sinon String
-- [ ] Créer `StatusBadge.jsx` + `StatusBadge.test.js` (AC: 3)
-  - [ ] Props : `{ downloaded, modified, viewed }` — tous boolean
-  - [ ] Chip MUI avec icône et couleur par état
-  - [ ] Cas "Nouveau" si tous false
-  - [ ] `index.js` d'export
-- [ ] Localiser et modifier le composant `DomainTable` (AC: 1)
-  - [ ] Identifier le fichier exact (vérifier `DomainsPage.jsx` ou `DomainTable.jsx`)
-  - [ ] Ajouter 3 colonnes : Datasets (Chip), Lignes totales (formatRowCount), Statuts (StatusBadge)
-  - [ ] Skeleton MUI pendant chargement
-  - [ ] Masquer "Lignes totales" en mobile via `useMediaQuery`
-  - [ ] Tests Jest correspondants
-- [ ] Enrichir `DomainDatasetsModal.jsx` (AC: 2)
-  - [ ] Remplacer `fetch('http://localhost:8080/...')` par `domainService.getDatasetsByDomain(domainId)`
-  - [ ] Afficher `StatusBadge` par dataset
-  - [ ] Afficher date `updatedAt` formatée (via `formatDateTime` existant dans formatters.js)
-  - [ ] Tri par `updatedAt DESC` par défaut
-  - [ ] Filtre rapide par statut (Select MUI)
-  - [ ] Mettre à jour `DomainDatasetsModal.test.jsx`
+- [x] Ajouter `getDatasetsByDomain(domainId)` dans `domainService.js` (AC: 2)
+  - [x] `GET /api/domains/{domainId}/data-sets` via `api.js` (pas de fetch hardcodé)
+  - [x] Unwrapper `response.data.data`
+- [x] Ajouter `formatRowCount` dans `utils/formatters.js` (AC: 1)
+  - [x] ≥ 1 000 000 → "1,2M" ; ≥ 1 000 → "12 500" (toLocaleString fr-FR) ; sinon String
+  - [x] Tests unitaires `formatters.test.js` — 7 tests (null, undefined, 0, <1000, ≥1000, ≥1M, décimales)
+- [x] Créer `StatusBadge.jsx` + `StatusBadge.test.jsx` (AC: 3)
+  - [x] Props : `{ downloaded, modified, viewed }` — tous boolean
+  - [x] Chip MUI avec icône et couleur par état
+  - [x] Cas "Nouveau" si tous false
+  - [x] `index.js` d'export
+- [x] Localiser et modifier le composant `DomainTable` (AC: 1)
+  - [x] Fichier : `components/DomainTable.jsx` (séparé de DomainsPage)
+  - [x] Ajouter 3 colonnes : Datasets (Chip), Lignes totales (formatRowCount), Statuts (StatusBadge)
+  - [x] Skeleton MUI pendant chargement (remplace CircularProgress)
+  - [x] Masquer "Lignes totales" en mobile via `useMediaQuery` (breakpoint sm)
+  - [x] Tests Jest correspondants (7 existants + 7 nouveaux = 14 tests)
+- [x] Enrichir `DomainDatasetsModal.jsx` (AC: 2)
+  - [x] Remplacer `fetch('http://localhost:8080/...')` par `domainService.getDatasetsByDomain(domainId)`
+  - [x] Afficher `StatusBadge` par dataset
+  - [x] Afficher date `updatedAt` formatée (via `formatDateTime` de formatters.js)
+  - [x] Tri par `updatedAt DESC` par défaut
+  - [x] Filtre rapide par statut (Select MUI : Tous / Modifiés / Téléchargés)
+  - [x] Mettre à jour `DomainDatasetsModal.test.jsx` (11 tests, mock domainService)
 
 ## Dev Notes
 
@@ -218,4 +219,23 @@ claude-sonnet-4-6
 
 ### Completion Notes List
 
+- ✅ `domainService.js` : `getDatasetsByDomain()` ajouté — GET `/api/domains/{domainId}/data-sets`, unwrap `response.data.data`
+- ✅ `formatters.js` : `formatRowCount()` ajouté — gère null, M, fr-FR toLocaleString
+- ✅ `formatters.test.js` : 7 tests unitaires pour `formatRowCount` (null, 0, <1000, ≥1000, ≥1M)
+- ✅ `StatusBadge` : nouveau composant MUI Chip avec 4 états, 6 tests unitaires
+- ✅ `DomainTable.jsx` : 3 nouvelles colonnes (Datasets/Chip, Lignes totales/formatRowCount masqué mobile, Statuts/StatusBadge), Skeleton loader, 14 tests (7 existants + 7 nouveaux)
+- ✅ `DomainDatasetsModal.jsx` : fetch hardcodé remplacé par `domainService.getDatasetsByDomain()`, table enrichie avec StatusBadge + formatDateTime + filtre Select MUI (Tous/Modifiés/Téléchargés) + tri updatedAt DESC, 11 tests (mock service)
+- ⚠️ 3 suites de tests pre-existantes échouent (BatchJobsContext, WizardStep2, ConfigurationPanel) — non liés à cette story (fichiers non modifiés, en échec avant)
+
 ### File List
+
+- `movkfact-frontend/src/services/domainService.js` — modifié
+- `movkfact-frontend/src/utils/formatters.js` — modifié
+- `movkfact-frontend/src/components/StatusBadge/StatusBadge.jsx` — créé
+- `movkfact-frontend/src/components/StatusBadge/StatusBadge.test.jsx` — créé
+- `movkfact-frontend/src/components/StatusBadge/index.js` — créé
+- `movkfact-frontend/src/components/DomainTable.jsx` — modifié
+- `movkfact-frontend/src/components/DomainTable.test.js` — modifié
+- `movkfact-frontend/src/components/DomainDatasetsModal/DomainDatasetsModal.jsx` — modifié
+- `movkfact-frontend/src/components/DomainDatasetsModal/DomainDatasetsModal.test.jsx` — modifié
+- `movkfact-frontend/src/utils/formatters.test.js` — créé

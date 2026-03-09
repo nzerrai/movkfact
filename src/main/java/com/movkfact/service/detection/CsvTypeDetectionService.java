@@ -1,11 +1,9 @@
 package com.movkfact.service.detection;
 
+import com.movkfact.dto.InferenceResult;
+import com.movkfact.dto.PiiResult;
 import com.movkfact.dto.TypeDetectionResult;
 import com.movkfact.dto.DetectedColumn;
-import com.movkfact.enums.ColumnType;
-import com.movkfact.service.detection.personal.PersonalTypeDetector;
-import com.movkfact.service.detection.financial.FinancialTypeDetector;
-import com.movkfact.service.detection.temporal.TemporalTypeDetector;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -34,23 +32,13 @@ public class CsvTypeDetectionService {
     
     private static final Logger logger = LoggerFactory.getLogger(CsvTypeDetectionService.class);
     
-    private static final long DEFAULT_MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
     private static final int DEFAULT_SAMPLE_SIZE = 100;
     
     @Autowired
-    private ColumnPatternDetector patternDetector;
-    
+    private ColumnTypeInferenceService inferenceService;
+
     @Autowired
-    private ColumnValueAnalyzer valueAnalyzer;
-    
-    @Autowired
-    private PersonalTypeDetector personalTypeDetector;
-    
-    @Autowired
-    private FinancialTypeDetector financialTypeDetector;
-    
-    @Autowired
-    private TemporalTypeDetector temporalTypeDetector;
+    private PiiDetectionService piiDetectionService;
     
     @Value("${detection.max-file-size:#{10*1024*1024}}")
     private long maxFileSize;
@@ -118,86 +106,31 @@ public class CsvTypeDetectionService {
                     rowCount++;
                 }
                 
-                // Detect type for each column
+                // Detect type for each column using ColumnTypeInferenceService (S9.1)
                 for (String header : headers) {
                     List<String> columnData = columnValues.get(header);
-                    
-                    // Try specialized detectors in order of specificity
-                    ColumnType detectedType = null;
-                    double finalConfidence = 0.0;
-                    
-                    // 1. Try Personal Type Detection (6 types: first_name, last_name, email, gender, phone, address)
-                    // Note: If detector returns non-null, it has already validated >= 75% confidence internally.
-                    // Service confidence is set to 85.0 to indicate validator-approved match (higher than 75% threshold).
-                    if (personalTypeDetector != null) {
-                        detectedType = personalTypeDetector.detect(header, columnData);
-                        if (detectedType != null) {
-                            finalConfidence = 85.0; // Validator-approved: passed internal threshold check
-                            logger.debug("CsvTypeDetectionService: Column '{}' → {} (via PersonalTypeDetector, validator-approved)",
-                                    header, detectedType.name());
-                        }
-                    }
-                    
-                    // 2. If not personal, try Financial Type Detection (3 types: amount, account_number, currency)
-                    if (detectedType == null && financialTypeDetector != null) {
-                        detectedType = financialTypeDetector.detect(header, columnData);
-                        if (detectedType != null) {
-                            finalConfidence = 85.0; // Validator-approved: passed internal threshold check
-                            logger.debug("CsvTypeDetectionService: Column '{}' → {} (via FinancialTypeDetector, validator-approved)",
-                                    header, detectedType.name());
-                        }
-                    }
-                    
-                    // 3. If not financial, try Temporal Type Detection (4 types: birth_date, date, time, timezone)
-                    if (detectedType == null && temporalTypeDetector != null) {
-                        detectedType = temporalTypeDetector.detect(header, columnData);
-                        if (detectedType != null) {
-                            finalConfidence = 85.0; // Validator-approved: passed internal threshold check
-                            logger.debug("CsvTypeDetectionService: Column '{}' → {} (via TemporalTypeDetector, validator-approved)",
-                                    header, detectedType.name());
-                        }
-                    }
-                    
-                    // 4. Fallback to basic pattern detector if specialized detectors found nothing
-                    if (detectedType == null) {
-                        Map<ColumnType, Integer> patternMatches = patternDetector.matchPatterns(header);
-                        if (!patternMatches.isEmpty()) {
-                            detectedType = patternMatches.entrySet().stream()
-                                    .max(Comparator.comparingInt(Map.Entry::getValue))
-                                    .map(Map.Entry::getKey)
-                                    .orElse(null);
-                            finalConfidence = (double) patternMatches.getOrDefault(detectedType, 0);
-                        }
-                        
-                        if (detectedType != null) {
-                            logger.debug("CsvTypeDetectionService: Column '{}' → {} (via PatternDetector, confidence: {}%)",
-                                    header, detectedType.name(), Math.round(finalConfidence));
-                        }
-                    }
-                    
-                    // Create DetectedColumn DTO
-                    if (detectedType != null && finalConfidence >= 75.0) {
-                        DetectedColumn detected = new DetectedColumn(
-                                header,
-                                detectedType,
-                                finalConfidence,
-                                new ArrayList<>(),  // alternatives
-                                Arrays.asList(header)  // matchedPatterns
-                        );
-                        detectedColumns.add(detected);
-                        logger.debug("CsvTypeDetectionService: Column '{}' → {} (confidence: {}%)",
-                                header, detectedType.name(), Math.round(finalConfidence));
+
+                    InferenceResult inference = inferenceService.infer(header, columnData);
+                    PiiResult pii = piiDetectionService.detect(header, columnData);
+
+                    DetectedColumn detected = new DetectedColumn(
+                            header,
+                            inference.getType(),
+                            inference.getConfidence(),
+                            new ArrayList<>(),
+                            inference.getType() != null ? Arrays.asList(header) : new ArrayList<>()
+                    );
+                    detected.setInferenceLevel(inference.getLevel());
+                    detected.setPII(pii.isPii());
+                    detected.setPiiCategory(pii.getCategory());
+                    detectedColumns.add(detected);
+
+                    if (inference.getType() != null) {
+                        logger.debug("CsvTypeDetectionService: Column '{}' → {} ({}, conf={}%)",
+                                header, inference.getType().name(), inference.getLevel(),
+                                Math.round(inference.getConfidence()));
                     } else {
-                        // Unknown or low confidence type
-                        DetectedColumn detected = new DetectedColumn(
-                                header,
-                                null,
-                                0.0,
-                                new ArrayList<>(),
-                                new ArrayList<>()
-                        );
-                        detectedColumns.add(detected);
-                        logger.debug("CsvTypeDetectionService: Column '{}' → UNKNOWN (confidence too low)", header);
+                        logger.debug("CsvTypeDetectionService: Column '{}' → UNKNOWN", header);
                     }
                 }
             }

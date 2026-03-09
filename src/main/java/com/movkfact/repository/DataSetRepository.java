@@ -65,4 +65,13 @@ public interface DataSetRepository extends JpaRepository<DataSet, Long> {
      */
     @Query("SELECT d.id FROM DataSet d WHERE d.deletedAt IS NULL")
     List<Long> findIdsByDeletedAtIsNull();
+
+    /**
+     * Find all active datasets for a list of domain IDs (anti-N+1).
+     * Used by DomainService.getDomainsWithStats() to load datasets for multiple domains in one query.
+     *
+     * @param domainIds list of domain IDs
+     * @return list of active datasets belonging to any of the given domains
+     */
+    List<DataSet> findByDomainIdInAndDeletedAtIsNull(List<Long> domainIds);
 }

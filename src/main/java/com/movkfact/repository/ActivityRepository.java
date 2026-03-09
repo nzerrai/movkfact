@@ -22,4 +22,10 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
      * Trouve toutes les activités d'un type spécifique pour un dataset.
      */
     List<Activity> findByDataSetIdAndActionOrderByTimestampDesc(Long dataSetId, ActivityActionType action);
+
+    /**
+     * Trouve toutes les activités pour une liste de datasets (anti-N+1).
+     * Utilisé par DomainService.getDomainsWithStats() et getDatasetsByDomainWithStats().
+     */
+    List<Activity> findByDataSetIdIn(List<Long> dataSetIds);
 }

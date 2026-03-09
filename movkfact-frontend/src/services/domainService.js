@@ -88,6 +88,20 @@ export const deleteDomain = async (id) => {
 };
 
 /**
+ * Get datasets for a domain with enriched status info (FR-003, requires S8.1 backend)
+ * @param {number} domainId
+ * @returns {Promise<Array>} Array of DataSetSummaryDTO objects with status and lastActivity
+ */
+export const getDatasetsByDomain = async (domainId) => {
+  try {
+    const response = await api.get(`/api/domains/${domainId}/data-sets`);
+    return response.data.data || [];
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
  * Preview 5 sample rows from column configuration (S7.1 endpoint)
  * @param {Array} columns - [{ name, columnType, constraints }]
  * @param {number} count - Number of preview rows (max 5)

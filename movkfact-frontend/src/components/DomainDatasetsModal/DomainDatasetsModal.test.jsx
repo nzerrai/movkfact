@@ -1,87 +1,71 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import DomainDatasetsModal from './DomainDatasetsModal';
 
+// Mock du service — remplace le fetch hardcodé
+jest.mock('../../services/domainService', () => ({
+  getDatasetsByDomain: jest.fn(),
+}));
+import { getDatasetsByDomain } from '../../services/domainService';
+
 const theme = createTheme();
 
-// Mock fetch
-global.fetch = jest.fn();
-
-const renderWithTheme = (component) => {
-  return render(
+const renderWithTheme = (component) =>
+  render(
     <BrowserRouter>
-      <ThemeProvider theme={theme}>
-        {component}
-      </ThemeProvider>
+      <ThemeProvider theme={theme}>{component}</ThemeProvider>
     </BrowserRouter>
   );
-};
+
+const mockDatasets = [
+  {
+    id: 1,
+    datasetName: 'dataset-alpha',
+    rowCount: 500,
+    columnCount: 5,
+    updatedAt: '2026-02-10T10:00:00Z',
+    status: { downloaded: true, modified: false, viewed: true },
+  },
+  {
+    id: 2,
+    datasetName: 'dataset-beta',
+    rowCount: 200,
+    columnCount: 3,
+    updatedAt: '2026-01-20T08:00:00Z',
+    status: { downloaded: false, modified: true, viewed: false },
+  },
+];
 
 describe('DomainDatasetsModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  test('displays header with domain name', async () => {
-    global.fetch.mockResolvedValueOnce({
-      json: () => Promise.resolve({ data: [] }),
-    });
+  test('affiche le nom du domaine dans le header', async () => {
+    getDatasetsByDomain.mockResolvedValueOnce([]);
 
     renderWithTheme(
       <DomainDatasetsModal
         open={true}
-        domainId="domain-1"
+        domainId={1}
         domainName="Test Domain"
         onClose={jest.fn()}
       />
     );
 
-    await waitFor(() => {
-      expect(screen.getByText(/Domain:/)).toBeInTheDocument();
-      const titleText = screen.getByText(/Domain:/);
-      expect(titleText).toHaveTextContent('Test Domain');
-    });
+    // Le domainName apparaît dans plusieurs éléments (header + alert)
+    const occurrences = screen.getAllByText('Test Domain');
+    expect(occurrences.length).toBeGreaterThanOrEqual(1);
   });
 
-  test('loads dataset count on open', async () => {
-    global.fetch.mockResolvedValueOnce({
-      json: () => Promise.resolve({ 
-        data: [
-          { id: 1, name: 'dataset1.csv' },
-          { id: 2, name: 'dataset2.csv' }
-        ] 
-      }),
-    });
+  test('affiche "0 datasets" quand aucun dataset', async () => {
+    getDatasetsByDomain.mockResolvedValueOnce([]);
 
     renderWithTheme(
-      <DomainDatasetsModal
-        open={true}
-        domainId="domain-1"
-        domainName="Test Domain"
-        onClose={jest.fn()}
-      />
-    );
-
-    await waitFor(() => {
-      expect(screen.getByText(/2 datasets/)).toBeInTheDocument();
-    });
-  });
-
-  test('displays 0 datasets when no datasets', async () => {
-    global.fetch.mockResolvedValueOnce({
-      json: () => Promise.resolve({ data: [] }),
-    });
-
-    renderWithTheme(
-      <DomainDatasetsModal
-        open={true}
-        domainId="domain-1"
-        domainName="Test Domain"
-        onClose={jest.fn()}
-      />
+      <DomainDatasetsModal open={true} domainId={1} domainName="D1" onClose={jest.fn()} />
     );
 
     await waitFor(() => {
@@ -89,114 +73,125 @@ describe('DomainDatasetsModal', () => {
     });
   });
 
-  test('calls onClose when close button clicked', async () => {
-    const mockOnClose = jest.fn();
-    global.fetch.mockResolvedValueOnce({
-      json: () => Promise.resolve({ data: [] }),
-    });
+  test('charge et affiche les datasets via domainService', async () => {
+    getDatasetsByDomain.mockResolvedValueOnce(mockDatasets);
 
     renderWithTheme(
-      <DomainDatasetsModal
-        open={true}
-        domainId="domain-1"
-        domainName="Test Domain"
-        onClose={mockOnClose}
-      />
+      <DomainDatasetsModal open={true} domainId={1} domainName="D1" onClose={jest.fn()} />
     );
 
-    const closeButton = screen.getByRole('button', { name: /close/i });
-    await userEvent.click(closeButton);
-    
+    await waitFor(() => {
+      expect(screen.getByText('dataset-alpha')).toBeInTheDocument();
+      expect(screen.getByText('dataset-beta')).toBeInTheDocument();
+    });
+  });
+
+  test('affiche les badges de statut pour chaque dataset', async () => {
+    getDatasetsByDomain.mockResolvedValueOnce(mockDatasets);
+
+    renderWithTheme(
+      <DomainDatasetsModal open={true} domainId={1} domainName="D1" onClose={jest.fn()} />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Téléchargé')).toBeInTheDocument();
+      expect(screen.getByText('Modifié')).toBeInTheDocument();
+    });
+  });
+
+  test('filtre par "Modifiés" ne montre que dataset-beta', async () => {
+    getDatasetsByDomain.mockResolvedValueOnce(mockDatasets);
+
+    renderWithTheme(
+      <DomainDatasetsModal open={true} domainId={1} domainName="D1" onClose={jest.fn()} />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('dataset-alpha')).toBeInTheDocument();
+    });
+
+    fireEvent.mouseDown(screen.getByRole('combobox'));
+    const modifiedOption = await screen.findByRole('option', { name: 'Modifiés' });
+    fireEvent.click(modifiedOption);
+
+    await waitFor(() => {
+      expect(screen.queryByText('dataset-alpha')).not.toBeInTheDocument();
+      expect(screen.getByText('dataset-beta')).toBeInTheDocument();
+    });
+  });
+
+  test('filtre par "Téléchargés" ne montre que dataset-alpha', async () => {
+    getDatasetsByDomain.mockResolvedValueOnce(mockDatasets);
+
+    renderWithTheme(
+      <DomainDatasetsModal open={true} domainId={1} domainName="D1" onClose={jest.fn()} />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('dataset-alpha')).toBeInTheDocument();
+    });
+
+    fireEvent.mouseDown(screen.getByRole('combobox'));
+    const downloadedOption = await screen.findByRole('option', { name: 'Téléchargés' });
+    fireEvent.click(downloadedOption);
+
+    await waitFor(() => {
+      expect(screen.getByText('dataset-alpha')).toBeInTheDocument();
+      expect(screen.queryByText('dataset-beta')).not.toBeInTheDocument();
+    });
+  });
+
+  test('appelle onClose quand le bouton Fermer est cliqué', async () => {
+    getDatasetsByDomain.mockResolvedValueOnce([]);
+    const mockOnClose = jest.fn();
+
+    renderWithTheme(
+      <DomainDatasetsModal open={true} domainId={1} domainName="D1" onClose={mockOnClose} />
+    );
+
+    await waitFor(() => screen.getByText('Fermer'));
+    await userEvent.click(screen.getByText('Fermer'));
+
     expect(mockOnClose).toHaveBeenCalled();
   });
 
-  test('has refresh button to reload datasets', async () => {
-    global.fetch.mockResolvedValueOnce({
-      json: () => Promise.resolve({ data: [] }),
-    });
+  test('affiche le bouton Refresh', async () => {
+    getDatasetsByDomain.mockResolvedValueOnce([]);
 
     renderWithTheme(
-      <DomainDatasetsModal
-        open={true}
-        domainId="domain-1"
-        domainName="Test Domain"
-        onClose={jest.fn()}
-      />
+      <DomainDatasetsModal open={true} domainId={1} domainName="D1" onClose={jest.fn()} />
     );
 
-    const refreshButton = screen.getByRole('button', { name: /refresh/i });
-    expect(refreshButton).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /refresh/i })).toBeInTheDocument();
   });
 
-  test('renders info alert about domain', async () => {
-    global.fetch.mockResolvedValueOnce({
-      json: () => Promise.resolve({ data: [] }),
-    });
-
+  test("n'appelle pas l'API si domainId est null", async () => {
     renderWithTheme(
-      <DomainDatasetsModal
-        open={true}
-        domainId="domain-1"
-        domainName="Test Domain"
-        onClose={jest.fn()}
-      />
+      <DomainDatasetsModal open={true} domainId={null} domainName="D1" onClose={jest.fn()} />
     );
 
     await waitFor(() => {
-      expect(screen.getByText(/Tous les fichiers CSV uploadés/)).toBeInTheDocument();
+      expect(getDatasetsByDomain).not.toHaveBeenCalled();
     });
   });
 
-  test('does not load data when closed', () => {
-    global.fetch.mockResolvedValueOnce({
-      json: () => Promise.resolve({ data: [] }),
-    });
-
+  test("n'appelle pas l'API si la modal est fermée", () => {
     renderWithTheme(
-      <DomainDatasetsModal
-        open={false}
-        domainId="domain-1"
-        domainName="Test Domain"
-        onClose={jest.fn()}
-      />
+      <DomainDatasetsModal open={false} domainId={1} domainName="D1" onClose={jest.fn()} />
     );
 
-    // fetch should not be called if modal is closed
-    expect(global.fetch).not.toHaveBeenCalled();
+    expect(getDatasetsByDomain).not.toHaveBeenCalled();
   });
 
-  test('does not call API if no domainId', async () => {
+  test('affiche une erreur si le service échoue', async () => {
+    getDatasetsByDomain.mockRejectedValueOnce(new Error('Network error'));
+
     renderWithTheme(
-      <DomainDatasetsModal
-        open={true}
-        domainId={null}
-        domainName="Test Domain"
-        onClose={jest.fn()}
-      />
+      <DomainDatasetsModal open={true} domainId={1} domainName="D1" onClose={jest.fn()} />
     );
 
     await waitFor(() => {
-      expect(global.fetch).not.toHaveBeenCalled();
-    });
-  });
-
-  test('renders UploadedDatasetsList component', async () => {
-    global.fetch.mockResolvedValueOnce({
-      json: () => Promise.resolve({ data: [] }),
-    });
-
-    renderWithTheme(
-      <DomainDatasetsModal
-        open={true}
-        domainId="domain-1"
-        domainName="Test Domain"
-        onClose={jest.fn()}
-      />
-    );
-
-    await waitFor(() => {
-      // UploadedDatasetsList should render (it's in the content)
-      expect(screen.getByText(/Tous les fichiers CSV uploadés/)).toBeInTheDocument();
+      expect(screen.getByText(/Impossible de charger les datasets/)).toBeInTheDocument();
     });
   });
 });

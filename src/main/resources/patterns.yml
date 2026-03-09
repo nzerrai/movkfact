@@ -41,6 +41,19 @@ ADDRESS:
   - "(?i)^location$"
   - "(?i)^full_?address$"
 
+ZIP_CODE:
+  - "(?i)^zip_?code$"
+  - "(?i)^postal_?code$"
+  - "(?i)^code_?postal$"
+  - "(?i)^zip$"
+  - "(?i)^cp$"
+
+CITY:
+  - "(?i)^city$"
+  - "(?i)^ville$"
+  - "(?i)^town$"
+  - "(?i)^municipality$"
+
 # FINANCIAL TYPOLOGY (3 types)
 AMOUNT:
   - "(?i)^amount$"

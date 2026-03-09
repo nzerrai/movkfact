@@ -173,10 +173,17 @@ const DomainsPage = () => {
     setCsvData(rawCsv || []);
     
     // Convert detectionResults array to detectedTypes object
+    // S9.1: preserve confidence and inferenceLevel for ConfigurationPanel
     const typesMap = {};
     if (detectionResults && Array.isArray(detectionResults)) {
       detectionResults.forEach(col => {
-        typesMap[col.name] = col.type;
+        typesMap[col.name] = {
+          type: col.type,
+          confidence: col.confidence || 0,
+          inferenceLevel: col.inferenceLevel || null,
+          isPII: col.pii || false,
+          piiCategory: col.piiCategory || null,
+        };
       });
     }
     setDetectedTypes(typesMap);

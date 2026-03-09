@@ -190,9 +190,13 @@ const UploadedDatasetsList = ({ domainId, onViewDataset, onDeleteDataset, showAc
                 </TableCell>
                 <TableCell>
                   <Chip
-                    label={dataset.status || 'Active'}
+                    label={
+                      typeof dataset.status === 'object' && dataset.status !== null
+                        ? dataset.status.modified ? 'Modifié' : dataset.status.downloaded ? 'Téléchargé' : 'Actif'
+                        : dataset.status || 'Active'
+                    }
                     size="small"
-                    color={dataset.status === 'failed' ? 'error' : 'success'}
+                    color="success"
                     variant="outlined"
                   />
                 </TableCell>

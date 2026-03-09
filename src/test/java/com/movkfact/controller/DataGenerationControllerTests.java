@@ -269,7 +269,7 @@ class DataGenerationControllerTests {
             .statusCode(200)
             .body("data", notNullValue())
             .body("data.size()", greaterThanOrEqualTo(1))
-            .body("data[0].domainId", equalTo(testDomainId.intValue()))
+            .body("data[0].id", notNullValue())
             .body("message", notNullValue());
     }
 

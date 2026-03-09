@@ -4,10 +4,14 @@ import {
   Button,
   Card,
   CardContent,
+  Checkbox,
+  Chip,
   CircularProgress,
   Divider,
+  FormControlLabel,
   Stack,
   TextField,
+  Tooltip,
   Typography
 } from '@mui/material';
 import React, { useContext, useEffect, useState } from 'react';
@@ -46,16 +50,37 @@ const ConfigurationPanel = ({
   const [checkingName, setCheckingName] = useState(false);
 
   // Initialize column configs from detected types
+  // S9.1: detectedTypes values may be { type, confidence, inferenceLevel } objects or plain strings
+  // S9.2: also preserve isPII and piiCategory
+  const resolveType = (val) => (val && typeof val === 'object' ? val.type : val);
+  const resolveConfidence = (val) => (val && typeof val === 'object' ? val.confidence : null);
+  const resolveLevel = (val) => (val && typeof val === 'object' ? val.inferenceLevel : null);
+  const resolveIsPII = (val) => (val && typeof val === 'object' ? val.isPII || false : false);
+  const resolvePiiCategory = (val) => (val && typeof val === 'object' ? val.piiCategory || null : null);
+
+  // S9.2: anonymization state — pre-checked for PII columns, user can uncheck (with warning)
+  const [anonymizeState, setAnonymizeState] = useState({});
+
   useEffect(() => {
     if (detectedTypes && Object.keys(detectedTypes).length > 0) {
       const initialConfigs = {};
-      Object.entries(detectedTypes).forEach(([colName, colType]) => {
+      const initialAnonymize = {};
+      Object.entries(detectedTypes).forEach(([colName, colVal]) => {
         initialConfigs[colName] = {
-          type: colType,
+          type: resolveType(colVal),
+          confidence: resolveConfidence(colVal),
+          inferenceLevel: resolveLevel(colVal),
+          isPII: resolveIsPII(colVal),
+          piiCategory: resolvePiiCategory(colVal),
           params: {}
         };
+        // Pre-check anonymization for PII columns (AC2)
+        if (resolveIsPII(colVal)) {
+          initialAnonymize[colName] = true;
+        }
       });
       setColumnConfigs(initialConfigs);
+      setAnonymizeState(initialAnonymize);
     }
   }, [detectedTypes]);
 
@@ -208,6 +233,55 @@ const ConfigurationPanel = ({
     }
   };
 
+  // S9.1 — badge de confiance (HIGH ≥ 85, MEDIUM 60–84, LOW < 60)
+  const ConfidenceBadge = ({ confidence, inferenceLevel }) => {
+    if (confidence == null) return null;
+    const label = confidence >= 85 ? 'Haute' : confidence >= 60 ? 'Moyenne' : 'Faible';
+    const color = confidence >= 85 ? 'success' : confidence >= 60 ? 'warning' : 'default';
+    const tip = inferenceLevel === 'NAME_BASED' ? 'Détecté via le nom de colonne' : 'Détecté via l\'analyse des données';
+    return (
+      <Tooltip title={`${tip} — confiance ${Math.round(confidence)}%`}>
+        <Chip label={`Confiance ${label}`} size="small" color={color} sx={{ ml: 1 }} />
+      </Tooltip>
+    );
+  };
+
+  // S9.2 — badge PII avec catégorie RGPD
+  const PiiBadge = ({ piiCategory }) => {
+    if (!piiCategory) return null;
+    const labels = { CONTACT: 'Contact', IDENTITY: 'Identité', LOCATION: 'Localisation' };
+    return (
+      <Tooltip title={`Donnée personnelle RGPD — catégorie : ${piiCategory}`}>
+        <Chip label={`PII · ${labels[piiCategory] || piiCategory}`} size="small" color="error" sx={{ ml: 1 }} />
+      </Tooltip>
+    );
+  };
+
+  // S9.2 — case à cocher anonymisation + avertissement si décochée
+  const AnonymizeCheckbox = ({ colName, isPII, piiCategory }) => {
+    if (!isPII) return null;
+    const checked = anonymizeState[colName] !== false;
+    return (
+      <Box sx={{ mt: 1 }}>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={checked}
+              size="small"
+              onChange={(e) => setAnonymizeState(prev => ({ ...prev, [colName]: e.target.checked }))}
+            />
+          }
+          label={<Typography variant="caption">Anonymiser (RGPD)</Typography>}
+        />
+        {!checked && (
+          <Alert severity="warning" sx={{ mt: 0.5, py: 0.5 }}>
+            Cette colonne contient des données personnelles ({piiCategory}). Désactiver l'anonymisation peut enfreindre le RGPD.
+          </Alert>
+        )}
+      </Box>
+    );
+  };
+
   const renderConfigForm = () => {
     if (!csvData || csvData.length === 0) {
       return (
@@ -226,65 +300,81 @@ const ConfigurationPanel = ({
 
         {Object.entries(columnConfigs).map(([colName, config]) => {
           const colType = config.type;
+          const isPII = config.isPII || false;
+          const piiCategory = config.piiCategory || null;
 
           // Render appropriate config component based on type
-          if (colType?.startsWith('FIRST_NAME') || colType?.startsWith('LAST_NAME') || 
-              colType?.startsWith('EMAIL') || colType?.startsWith('GENDER') || 
+          if (colType?.startsWith('FIRST_NAME') || colType?.startsWith('LAST_NAME') ||
+              colType?.startsWith('EMAIL') || colType?.startsWith('GENDER') ||
               colType?.startsWith('PHONE') || colType?.startsWith('ADDRESS')) {
             return (
-              <PersonalFieldConfig
-                key={colName}
-                columnName={colName}
-                columnType={colType}
-                config={config.params}
-                onChange={(newParams) => handleConfigChange(colName, newParams)}
-              />
+              <Box key={colName}>
+                <PersonalFieldConfig
+                  columnName={colName}
+                  columnType={colType}
+                  config={config.params}
+                  onChange={(newParams) => handleConfigChange(colName, newParams)}
+                  piiCategory={piiCategory}
+                />
+                <AnonymizeCheckbox colName={colName} isPII={isPII} piiCategory={piiCategory} />
+              </Box>
             );
           }
 
-          if (colType?.startsWith('AMOUNT') || colType?.startsWith('ACCOUNT_NUMBER') || 
+          if (colType?.startsWith('AMOUNT') || colType?.startsWith('ACCOUNT_NUMBER') ||
               colType?.startsWith('CURRENCY')) {
             return (
-              <FinancialFieldConfig
-                key={colName}
-                columnName={colName}
-                columnType={colType}
-                config={config.params}
-                onChange={(newParams) => handleConfigChange(colName, newParams)}
-              />
+              <Box key={colName}>
+                <FinancialFieldConfig
+                  columnName={colName}
+                  columnType={colType}
+                  config={config.params}
+                  onChange={(newParams) => handleConfigChange(colName, newParams)}
+                />
+                <AnonymizeCheckbox colName={colName} isPII={isPII} piiCategory={piiCategory} />
+              </Box>
             );
           }
 
           if (colType === 'INTEGER' || colType === 'DECIMAL' || colType === 'PERCENTAGE') {
             return (
-              <NumericFieldConfig
-                key={colName}
-                columnName={colName}
-                columnType={colType}
-                config={config.params}
-                onChange={(newParams) => handleConfigChange(colName, newParams)}
-              />
+              <Box key={colName}>
+                <NumericFieldConfig
+                  columnName={colName}
+                  columnType={colType}
+                  config={config.params}
+                  onChange={(newParams) => handleConfigChange(colName, newParams)}
+                />
+                <AnonymizeCheckbox colName={colName} isPII={isPII} piiCategory={piiCategory} />
+              </Box>
             );
           }
 
           if (colType?.startsWith('BIRTH_DATE') || colType?.startsWith('DATE') ||
               colType?.startsWith('TIME') || colType?.startsWith('TIMEZONE')) {
             return (
-              <TemporalFieldConfig
-                key={colName}
-                columnName={colName}
-                columnType={colType}
-                config={config.params}
-                onChange={(newParams) => handleConfigChange(colName, newParams)}
-              />
+              <Box key={colName}>
+                <TemporalFieldConfig
+                  columnName={colName}
+                  columnType={colType}
+                  config={config.params}
+                  onChange={(newParams) => handleConfigChange(colName, newParams)}
+                />
+                <AnonymizeCheckbox colName={colName} isPII={isPII} piiCategory={piiCategory} />
+              </Box>
             );
           }
 
-          // Fallback for types without specific config (INTEGER, DECIMAL, TEXT, COUNTRY, etc.)
+          // Fallback for types without specific config (TEXT, COUNTRY, ZIP_CODE, CITY, etc.)
           return (
             <Box key={colName} sx={{ mb: 2, p: 2, border: '1px solid #eee', borderRadius: 1 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>{colName}</Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0.5 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>{colName}</Typography>
+                <ConfidenceBadge confidence={config.confidence} inferenceLevel={config.inferenceLevel} />
+                <PiiBadge piiCategory={piiCategory} />
+              </Box>
               <Typography variant="caption" color="text.secondary">Type: {colType} — no specific configuration required</Typography>
+              <AnonymizeCheckbox colName={colName} isPII={isPII} piiCategory={piiCategory} />
             </Box>
           );
         })}

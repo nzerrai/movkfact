@@ -12,16 +12,30 @@ import {
   Typography,
   IconButton,
   Tooltip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import UploadedDatasetsList from '../CsvUploadPanel/UploadedDatasetsList';
+import StatusBadge from '../StatusBadge';
+import { getDatasetsByDomain } from '../../services/domainService';
+import { formatDateTime } from '../../utils/formatters';
 
 /**
- * Modal pour voir les datasets uploadés d'un Domain
- * - Affiche la liste des datasets
- * - Permet de view/delete les datasets
- * - Accès rapide sans passer par l'upload workflow
+ * Modal enrichie — affiche les datasets d'un domaine avec statuts (FR-003).
+ * - Remplace le fetch hardcodé par domainService.getDatasetsByDomain()
+ * - StatusBadge par dataset
+ * - Tri par updatedAt DESC par défaut
+ * - Filtre par statut : Tous / Modifiés / Téléchargés
  */
 const DomainDatasetsModal = ({
   open,
@@ -30,38 +44,41 @@ const DomainDatasetsModal = ({
   onClose,
 }) => {
   const navigate = useNavigate();
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [isLoadingCount, setIsLoadingCount] = useState(false);
-  const [datasetCount, setDatasetCount] = useState(null);
+  const [datasets, setDatasets] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [filterStatus, setFilterStatus] = useState('all');
 
-  // Memoized function to load dataset count
-  const loadDatasetCount = useCallback(async () => {
-    setIsLoadingCount(true);
+  const loadDatasets = useCallback(async () => {
+    if (!domainId) return;
+    setLoading(true);
+    setError(null);
     try {
-      const result = await fetch(
-        `http://localhost:8080/api/domains/${domainId}/data-sets`,
-        { method: 'GET' }
-      );
-      const data = await result.json();
-      setDatasetCount(Array.isArray(data.data) ? data.data.length : 0);
+      const data = await getDatasetsByDomain(domainId);
+      // Tri updatedAt DESC (déjà fait côté backend, on s'assure)
+      const sorted = [...data].sort((a, b) => {
+        if (!a.updatedAt) return 1;
+        if (!b.updatedAt) return -1;
+        return new Date(b.updatedAt) - new Date(a.updatedAt);
+      });
+      setDatasets(sorted);
     } catch (err) {
-      console.error('Failed to load dataset count:', err);
-      setDatasetCount(0);
+      console.error('Failed to load datasets:', err);
+      setError('Impossible de charger les datasets.');
+      setDatasets([]);
     } finally {
-      setIsLoadingCount(false);
+      setLoading(false);
     }
   }, [domainId]);
 
-  // Charger le nombre de datasets au démarrage
   useEffect(() => {
     if (open && domainId) {
-      loadDatasetCount();
+      loadDatasets();
     }
-  }, [open, domainId, loadDatasetCount]);
+  }, [open, domainId, loadDatasets]);
 
   const handleRefresh = () => {
-    setRefreshTrigger(prev => prev + 1);
-    loadDatasetCount();
+    loadDatasets();
   };
 
   const handleViewDataset = (dataset) => {
@@ -71,18 +88,19 @@ const DomainDatasetsModal = ({
     }
   };
 
+  const filteredDatasets = datasets.filter((ds) => {
+    if (filterStatus === 'modified') return ds.status?.modified;
+    if (filterStatus === 'downloaded') return ds.status?.downloaded;
+    return true;
+  });
+
   return (
     <Dialog
       open={open}
       onClose={onClose}
       maxWidth="md"
       fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: 2,
-          boxShadow: 3,
-        },
-      }}
+      PaperProps={{ sx: { borderRadius: 2, boxShadow: 3 } }}
     >
       {/* Header */}
       <DialogTitle
@@ -97,14 +115,14 @@ const DomainDatasetsModal = ({
       >
         <Box>
           <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
-            📊 Uploaded Datasets
+            Datasets du domaine
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
             Domain: <strong>{domainName}</strong>
-            {isLoadingCount ? (
+            {loading ? (
               <CircularProgress size={16} sx={{ ml: 1 }} />
             ) : (
-              ` (${datasetCount ?? 0} dataset${datasetCount !== 1 ? 's' : ''})`
+              ` (${datasets.length} dataset${datasets.length !== 1 ? 's' : ''})`
             )}
           </Typography>
         </Box>
@@ -113,9 +131,7 @@ const DomainDatasetsModal = ({
             <IconButton
               onClick={handleRefresh}
               size="small"
-              sx={{
-                '&:hover': { backgroundColor: '#e0e0e0' },
-              }}
+              sx={{ '&:hover': { backgroundColor: '#e0e0e0' } }}
             >
               <RefreshIcon fontSize="small" />
             </IconButton>
@@ -123,9 +139,7 @@ const DomainDatasetsModal = ({
           <IconButton
             onClick={onClose}
             size="small"
-            sx={{
-              '&:hover': { backgroundColor: '#e0e0e0' },
-            }}
+            sx={{ '&:hover': { backgroundColor: '#e0e0e0' } }}
           >
             <CloseIcon fontSize="small" />
           </IconButton>
@@ -134,30 +148,87 @@ const DomainDatasetsModal = ({
 
       {/* Content */}
       <DialogContent sx={{ p: 3 }}>
-        <Box sx={{ mb: 2 }}>
-          <Alert severity="info" sx={{ mb: 2 }}>
-            📁 Tous les fichiers CSV uploadés pour le domain <strong>{domainName}</strong>
+        {/* Filtre par statut */}
+        <Box sx={{ mb: 2, display: 'flex', gap: 2, alignItems: 'center' }}>
+          <Alert severity="info" sx={{ flex: 1 }}>
+            Tous les fichiers CSV uploadés pour le domain <strong>{domainName}</strong>
           </Alert>
+          <FormControl size="small" sx={{ minWidth: 160 }}>
+            <InputLabel>Filtre statut</InputLabel>
+            <Select
+              value={filterStatus}
+              label="Filtre statut"
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <MenuItem value="all">Tous</MenuItem>
+              <MenuItem value="modified">Modifiés</MenuItem>
+              <MenuItem value="downloaded">Téléchargés</MenuItem>
+            </Select>
+          </FormControl>
         </Box>
 
-        {domainId && (
-          <UploadedDatasetsList
-            key={refreshTrigger}
-            domainId={domainId}
-            onViewDataset={handleViewDataset}
-            onDeleteDataset={(datasetId) => {
-              // Refresh the list after deletion
-              handleRefresh();
-            }}
-            showActions={true}
-          />
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+            <CircularProgress />
+          </Box>
+        ) : filteredDatasets.length === 0 ? (
+          <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
+            Aucun dataset{filterStatus !== 'all' ? ' pour ce filtre' : ''}.
+          </Typography>
+        ) : (
+          <TableContainer component={Paper} variant="outlined">
+            <Table size="small">
+              <TableHead>
+                <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+                  <TableCell><strong>Nom</strong></TableCell>
+                  <TableCell><strong>Lignes</strong></TableCell>
+                  <TableCell><strong>Colonnes</strong></TableCell>
+                  <TableCell><strong>Statut</strong></TableCell>
+                  <TableCell><strong>Dernière modif.</strong></TableCell>
+                  <TableCell align="center"><strong>Action</strong></TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filteredDatasets.map((ds) => (
+                  <TableRow key={ds.id} hover>
+                    <TableCell>{ds.datasetName || ds.name || '—'}</TableCell>
+                    <TableCell>{ds.rowCount ?? '—'}</TableCell>
+                    <TableCell>{ds.columnCount ?? '—'}</TableCell>
+                    <TableCell>
+                      <StatusBadge
+                        downloaded={ds.status?.downloaded ?? false}
+                        modified={ds.status?.modified ?? false}
+                        viewed={ds.status?.viewed ?? false}
+                      />
+                    </TableCell>
+                    <TableCell>{formatDateTime(ds.updatedAt)}</TableCell>
+                    <TableCell align="center">
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        onClick={() => handleViewDataset(ds)}
+                      >
+                        Voir
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
         )}
       </DialogContent>
 
       {/* Footer */}
       <DialogActions sx={{ p: 2, borderTop: '1px solid #e0e0e0' }}>
         <Button onClick={onClose} sx={{ px: 3 }}>
-          Close
+          Fermer
         </Button>
       </DialogActions>
     </Dialog>

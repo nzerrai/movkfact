@@ -14,9 +14,11 @@ import com.movkfact.response.ApiResponse;
 import com.movkfact.event.DatasetActivityEvent;
 import com.movkfact.entity.ActivityActionType;
 import com.movkfact.entity.Activity;
+import com.movkfact.dto.DataSetSummaryDTO;
 import com.movkfact.service.ActivityService;
 import com.movkfact.service.ColumnConfigurationService;
 import com.movkfact.service.DataGeneratorService;
+import com.movkfact.service.DomainService;
 import org.springframework.context.ApplicationEventPublisher;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -72,6 +74,9 @@ public class DataGenerationController {
 
     @Autowired
     private ColumnConfigurationService columnConfigurationService;
+
+    @Autowired
+    private DomainService domainService;
 
     // ============================================================================
     // POST /api/domains/{domainId}/data-sets - Create new dataset
@@ -277,20 +282,11 @@ public class DataGenerationController {
             description = "Domain not found"
         )
     })
-    public ResponseEntity<ApiResponse<List<DataSetDTO>>> listDatasetsByDomain(
+    public ResponseEntity<ApiResponse<List<DataSetSummaryDTO>>> listDatasetsByDomain(
             @Parameter(description = "The domain ID", required = true)
             @PathVariable Long domainId) {
-        
-        // Validate domain exists
-        domainRepository.findByIdAndDeletedAtIsNull(domainId)
-            .orElseThrow(() -> new EntityNotFoundException("Domain not found with id " + domainId));
-        
-        // Query datasets
-        List<DataSet> datasets = dataSetRepository.findByDomainIdAndDeletedAtIsNull(domainId);
-        List<DataSetDTO> dtos = datasets.stream()
-            .map(this::mapToDTO)
-            .collect(Collectors.toList());
-        
+
+        List<DataSetSummaryDTO> dtos = domainService.getDatasetsByDomainWithStats(domainId);
         return ResponseEntity.ok(
             ApiResponse.success(dtos, "Retrieved " + dtos.size() + " dataset(s)")
         );

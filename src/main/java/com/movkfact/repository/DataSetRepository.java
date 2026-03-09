@@ -74,4 +74,10 @@ public interface DataSetRepository extends JpaRepository<DataSet, Long> {
      * @return list of active datasets belonging to any of the given domains
      */
     List<DataSet> findByDomainIdInAndDeletedAtIsNull(List<Long> domainIds);
+
+    /**
+     * Returns the most recently created active dataset for a domain.
+     * Used as fallback column source for domains without column_configurations.
+     */
+    java.util.Optional<DataSet> findTopByDomainIdAndDeletedAtIsNullOrderByCreatedAtDesc(Long domainId);
 }

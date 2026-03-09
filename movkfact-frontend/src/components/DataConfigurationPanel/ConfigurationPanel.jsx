@@ -8,7 +8,11 @@ import {
   Chip,
   CircularProgress,
   Divider,
+  FormControl,
   FormControlLabel,
+  InputLabel,
+  MenuItem,
+  Select,
   Stack,
   TextField,
   Tooltip,
@@ -55,6 +59,7 @@ const ConfigurationPanel = ({
   const resolveType = (val) => (val && typeof val === 'object' ? val.type : val);
   const resolveConfidence = (val) => (val && typeof val === 'object' ? val.confidence : null);
   const resolveLevel = (val) => (val && typeof val === 'object' ? val.inferenceLevel : null);
+  const resolveLearnedCount = (val) => (val && typeof val === 'object' ? val.learnedCount || 0 : 0);
   const resolveIsPII = (val) => (val && typeof val === 'object' ? val.isPII || false : false);
   const resolvePiiCategory = (val) => (val && typeof val === 'object' ? val.piiCategory || null : null);
 
@@ -68,8 +73,10 @@ const ConfigurationPanel = ({
       Object.entries(detectedTypes).forEach(([colName, colVal]) => {
         initialConfigs[colName] = {
           type: resolveType(colVal),
+          detectedType: resolveType(colVal), // S10.1 — type initial pour le feedback
           confidence: resolveConfidence(colVal),
           inferenceLevel: resolveLevel(colVal),
+          learnedCount: resolveLearnedCount(colVal),
           isPII: resolveIsPII(colVal),
           piiCategory: resolvePiiCategory(colVal),
           params: {}
@@ -134,6 +141,48 @@ const ConfigurationPanel = ({
     });
   };
 
+  // S10.1 / M4 — sélecteur de type : permet de corriger le type détecté
+  const handleTypeChange = (columnName, newType) => {
+    setColumnConfigs(prev => ({
+      ...prev,
+      [columnName]: {
+        ...prev[columnName],
+        type: newType,
+        params: {} // reset des params spécifiques au type précédent
+      }
+    }));
+  };
+
+  // Tous les types disponibles (miroir de l'enum Java ColumnType)
+  const ALL_COLUMN_TYPES = [
+    { value: 'FIRST_NAME', label: 'Prénom' },
+    { value: 'LAST_NAME', label: 'Nom de famille' },
+    { value: 'EMAIL', label: 'Email' },
+    { value: 'PHONE', label: 'Téléphone' },
+    { value: 'GENDER', label: 'Genre' },
+    { value: 'ADDRESS', label: 'Adresse' },
+    { value: 'INTEGER', label: 'Nombre entier' },
+    { value: 'DECIMAL', label: 'Nombre décimal' },
+    { value: 'PERCENTAGE', label: 'Pourcentage' },
+    { value: 'BOOLEAN', label: 'Booléen' },
+    { value: 'ENUM', label: 'Liste de valeurs' },
+    { value: 'TEXT', label: 'Texte libre' },
+    { value: 'UUID', label: 'UUID' },
+    { value: 'URL', label: 'URL' },
+    { value: 'IP_ADDRESS', label: 'Adresse IP' },
+    { value: 'COUNTRY', label: 'Pays' },
+    { value: 'CITY', label: 'Ville' },
+    { value: 'COMPANY', label: 'Entreprise' },
+    { value: 'ZIP_CODE', label: 'Code postal' },
+    { value: 'AMOUNT', label: 'Montant' },
+    { value: 'CURRENCY', label: 'Devise' },
+    { value: 'ACCOUNT_NUMBER', label: 'Numéro de compte' },
+    { value: 'DATE', label: 'Date générique' },
+    { value: 'TIME', label: 'Heure' },
+    { value: 'TIMEZONE', label: 'Fuseau horaire' },
+    { value: 'BIRTH_DATE', label: 'Date de naissance' },
+  ];
+
   const handleNameChange = (e) => {
     const name = e.target.value;
     setDatasetName(name);
@@ -192,7 +241,12 @@ const ConfigurationPanel = ({
         if (Object.keys(params).length > 0) {
           colDto.additionalConfig = JSON.stringify(params);
         }
-        
+
+        // ENUM: send values as constraints so EnumGenerator can pick a random value
+        if (config.type === 'ENUM' && params.values?.length > 0) {
+          colDto.constraints = { values: params.values };
+        }
+
         return colDto;
       });
 
@@ -221,6 +275,23 @@ const ConfigurationPanel = ({
       setGenerationResult(result.data);
       setStep('results');
 
+      // S10.1 — envoyer le feedback de détection pour apprentissage adaptatif
+      try {
+        const feedbacks = Object.entries(columnConfigs).map(([colName, config]) => ({
+          colName,
+          detectedType: config.detectedType || null,
+          validatedType: config.type || null,
+        }));
+        await fetch(`http://localhost:8080/api/domains/${domainId}/feedback`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(feedbacks),
+        });
+      } catch (feedbackErr) {
+        // Non bloquant — le feedback est best-effort
+        console.warn('Feedback submission failed (non-blocking):', feedbackErr);
+      }
+
       if (onGenerationComplete) {
         onGenerationComplete(result.data);
       }
@@ -233,9 +304,18 @@ const ConfigurationPanel = ({
     }
   };
 
-  // S9.1 — badge de confiance (HIGH ≥ 85, MEDIUM 60–84, LOW < 60)
-  const ConfidenceBadge = ({ confidence, inferenceLevel }) => {
+  // S9.1 + S10.1 — badge de confiance / apprentissage
+  const ConfidenceBadge = ({ confidence, inferenceLevel, learnedCount }) => {
     if (confidence == null) return null;
+    // S10.1 — badge "Appris" si LEARNED (AC5 — tooltip avec N fois)
+    if (inferenceLevel === 'LEARNED') {
+      const countLabel = learnedCount > 0 ? `${learnedCount} fois` : 'plusieurs fois';
+      return (
+        <Tooltip title={`Détecté via vos précédentes validations (${countLabel}) — confiance ${Math.round(confidence)}%`}>
+          <Chip label="Appris" size="small" color="primary" sx={{ ml: 1 }} />
+        </Tooltip>
+      );
+    }
     const label = confidence >= 85 ? 'Haute' : confidence >= 60 ? 'Moyenne' : 'Faible';
     const color = confidence >= 85 ? 'success' : confidence >= 60 ? 'warning' : 'default';
     const tip = inferenceLevel === 'NAME_BASED' ? 'Détecté via le nom de colonne' : 'Détecté via l\'analyse des données';
@@ -303,12 +383,40 @@ const ConfigurationPanel = ({
           const isPII = config.isPII || false;
           const piiCategory = config.piiCategory || null;
 
+          // S10.1 / M4 — en-tête commun à toutes les colonnes : badge + sélecteur de type
+          const ColumnHeader = () => (
+            <Box sx={{ mb: 1, p: 1.5, border: '1px solid #e0e0e0', borderRadius: 1, backgroundColor: '#fafafa' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0.5, mb: 1 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>{colName}</Typography>
+                <ConfidenceBadge
+                  confidence={config.confidence}
+                  inferenceLevel={config.inferenceLevel}
+                  learnedCount={config.learnedCount}
+                />
+                <PiiBadge piiCategory={piiCategory} />
+              </Box>
+              <FormControl size="small" sx={{ minWidth: 220 }}>
+                <InputLabel>Type de colonne</InputLabel>
+                <Select
+                  value={colType || ''}
+                  label="Type de colonne"
+                  onChange={(e) => handleTypeChange(colName, e.target.value)}
+                >
+                  {ALL_COLUMN_TYPES.map(t => (
+                    <MenuItem key={t.value} value={t.value}>{t.label} ({t.value})</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+          );
+
           // Render appropriate config component based on type
           if (colType?.startsWith('FIRST_NAME') || colType?.startsWith('LAST_NAME') ||
               colType?.startsWith('EMAIL') || colType?.startsWith('GENDER') ||
               colType?.startsWith('PHONE') || colType?.startsWith('ADDRESS')) {
             return (
-              <Box key={colName}>
+              <Box key={colName} sx={{ mb: 2 }}>
+                <ColumnHeader />
                 <PersonalFieldConfig
                   columnName={colName}
                   columnType={colType}
@@ -324,7 +432,8 @@ const ConfigurationPanel = ({
           if (colType?.startsWith('AMOUNT') || colType?.startsWith('ACCOUNT_NUMBER') ||
               colType?.startsWith('CURRENCY')) {
             return (
-              <Box key={colName}>
+              <Box key={colName} sx={{ mb: 2 }}>
+                <ColumnHeader />
                 <FinancialFieldConfig
                   columnName={colName}
                   columnType={colType}
@@ -338,7 +447,8 @@ const ConfigurationPanel = ({
 
           if (colType === 'INTEGER' || colType === 'DECIMAL' || colType === 'PERCENTAGE') {
             return (
-              <Box key={colName}>
+              <Box key={colName} sx={{ mb: 2 }}>
+                <ColumnHeader />
                 <NumericFieldConfig
                   columnName={colName}
                   columnType={colType}
@@ -353,7 +463,8 @@ const ConfigurationPanel = ({
           if (colType?.startsWith('BIRTH_DATE') || colType?.startsWith('DATE') ||
               colType?.startsWith('TIME') || colType?.startsWith('TIMEZONE')) {
             return (
-              <Box key={colName}>
+              <Box key={colName} sx={{ mb: 2 }}>
+                <ColumnHeader />
                 <TemporalFieldConfig
                   columnName={colName}
                   columnType={colType}
@@ -365,15 +476,44 @@ const ConfigurationPanel = ({
             );
           }
 
+          if (colType === 'ENUM') {
+            const values = config.params?.values ?? [];
+            // rawEnumInput holds the live string while typing; falls back to joined values
+            const raw = config.params?.rawEnumInput ?? values.join(', ');
+            return (
+              <Box key={colName} sx={{ mb: 2 }}>
+                <ColumnHeader />
+                <TextField
+                  label="Valeurs (séparées par des virgules)"
+                  size="small"
+                  value={raw}
+                  onChange={(e) => {
+                    // Only update the raw display string — do not parse yet
+                    handleConfigChange(colName, { ...config.params, rawEnumInput: e.target.value });
+                  }}
+                  onBlur={(e) => {
+                    // Parse into array on blur
+                    const list = e.target.value.split(',').map(v => v.trim()).filter(v => v !== '');
+                    handleConfigChange(colName, { values: list, rawEnumInput: list.join(', ') });
+                  }}
+                  fullWidth
+                  placeholder="Ex: Actif, Inactif, Suspendu"
+                  helperText={values.length === 0 ? 'Saisissez au moins une valeur' : `${values.length} valeur(s) définies`}
+                  error={values.length === 0}
+                  sx={{ mt: 1 }}
+                />
+                <AnonymizeCheckbox colName={colName} isPII={isPII} piiCategory={piiCategory} />
+              </Box>
+            );
+          }
+
           // Fallback for types without specific config (TEXT, COUNTRY, ZIP_CODE, CITY, etc.)
           return (
-            <Box key={colName} sx={{ mb: 2, p: 2, border: '1px solid #eee', borderRadius: 1 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0.5 }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>{colName}</Typography>
-                <ConfidenceBadge confidence={config.confidence} inferenceLevel={config.inferenceLevel} />
-                <PiiBadge piiCategory={piiCategory} />
-              </Box>
-              <Typography variant="caption" color="text.secondary">Type: {colType} — no specific configuration required</Typography>
+            <Box key={colName} sx={{ mb: 2 }}>
+              <ColumnHeader />
+              <Typography variant="caption" color="text.secondary" sx={{ pl: 0.5 }}>
+                Aucune configuration spécifique requise pour ce type.
+              </Typography>
               <AnonymizeCheckbox colName={colName} isPII={isPII} piiCategory={piiCategory} />
             </Box>
           );

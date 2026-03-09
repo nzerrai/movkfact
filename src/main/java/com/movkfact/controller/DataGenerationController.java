@@ -161,7 +161,8 @@ public class DataGenerationController {
         // Persist to database
         DataSet saved = dataSetRepository.save(dataset);
 
-        // Sync column configurations so batch generation can reuse this domain's schema
+        // Sync column configurations so batch generation can reuse this domain's schema.
+        // additionalConfig stores constraints as JSON (e.g. ENUM values).
         List<Map<String, Object>> colConfigs = request.getColumns().stream()
             .map(col -> {
                 Map<String, Object> m = new java.util.HashMap<>();
@@ -169,6 +170,13 @@ public class DataGenerationController {
                 m.put("type", col.getColumnType() != null ? col.getColumnType().name() : "TEXT");
                 m.put("confidence", 1.0);
                 m.put("detector", "manual");
+                if (col.getConstraints() != null && !col.getConstraints().isEmpty()) {
+                    try {
+                        m.put("additionalConfig", objectMapper.writeValueAsString(col.getConstraints()));
+                    } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+                        // constraint serialization failure is non-fatal
+                    }
+                }
                 return m;
             })
             .collect(Collectors.toList());

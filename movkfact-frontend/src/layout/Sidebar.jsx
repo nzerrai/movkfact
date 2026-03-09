@@ -28,9 +28,9 @@ const Sidebar = ({ open, onClose }) => {
     { label: 'Dashboard', icon: <HomeIcon />, path: '/' },
     { label: 'Domains', icon: <PersonIcon />, path: '/domains' },
     { label: 'Datasets', icon: <StorageIcon />, path: '/datasets' },
-    { label: 'Settings', icon: <SettingsIcon />, path: '/settings' },
     { label: 'API Reference', icon: <IntegrationInstructionsIcon />, path: '/api-reference' },
     { label: 'Anonymisation RGPD', icon: <ShieldIcon />, path: '/anonymization' },
+    { label: 'Settings', icon: <SettingsIcon />, path: '/settings' },
   ];
 
   const drawerContent = (

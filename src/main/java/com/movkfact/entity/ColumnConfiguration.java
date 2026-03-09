@@ -4,8 +4,10 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 /**
- * Entity representing a column configuration for CSV uploads
- * Maps detected CSV columns to data types
+ * Entity representing a column configuration for CSV uploads or manual generation.
+ * Maps detected CSV columns to data types.
+ * The {@code additionalConfig} field stores type-specific constraints as JSON
+ * (e.g., ENUM values: {@code {"values":["Actif","Inactif"]}}).
  */
 @Entity
 @Table(name = "column_configurations")
@@ -30,6 +32,10 @@ public class ColumnConfiguration {
     @Column(columnDefinition = "TEXT")
     private String detector;
 
+    /** Contraintes sérialisées en JSON (ex: valeurs ENUM, plages numériques). */
+    @Column(columnDefinition = "TEXT")
+    private String additionalConfig;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -51,7 +57,7 @@ public class ColumnConfiguration {
     public ColumnConfiguration() {
     }
 
-    public ColumnConfiguration(Long domainId, String columnName, String detectedType, 
+    public ColumnConfiguration(Long domainId, String columnName, String detectedType,
                                Double confidence, String detector) {
         this.domainId = domainId;
         this.columnName = columnName;
@@ -61,67 +67,30 @@ public class ColumnConfiguration {
     }
 
     // Getters and Setters
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public Long getDomainId() { return domainId; }
+    public void setDomainId(Long domainId) { this.domainId = domainId; }
 
-    public Long getDomainId() {
-        return domainId;
-    }
+    public String getColumnName() { return columnName; }
+    public void setColumnName(String columnName) { this.columnName = columnName; }
 
-    public void setDomainId(Long domainId) {
-        this.domainId = domainId;
-    }
+    public String getDetectedType() { return detectedType; }
+    public void setDetectedType(String detectedType) { this.detectedType = detectedType; }
 
-    public String getColumnName() {
-        return columnName;
-    }
+    public Double getConfidence() { return confidence; }
+    public void setConfidence(Double confidence) { this.confidence = confidence; }
 
-    public void setColumnName(String columnName) {
-        this.columnName = columnName;
-    }
+    public String getDetector() { return detector; }
+    public void setDetector(String detector) { this.detector = detector; }
 
-    public String getDetectedType() {
-        return detectedType;
-    }
+    public String getAdditionalConfig() { return additionalConfig; }
+    public void setAdditionalConfig(String additionalConfig) { this.additionalConfig = additionalConfig; }
 
-    public void setDetectedType(String detectedType) {
-        this.detectedType = detectedType;
-    }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-    public Double getConfidence() {
-        return confidence;
-    }
-
-    public void setConfidence(Double confidence) {
-        this.confidence = confidence;
-    }
-
-    public String getDetector() {
-        return detector;
-    }
-
-    public void setDetector(String detector) {
-        this.detector = detector;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

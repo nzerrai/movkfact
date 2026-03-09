@@ -72,6 +72,9 @@ public class SecurityConfig {
                         // Anonymization API endpoints - public for MVP
                         .requestMatchers("/api/anonymize/**").permitAll()
 
+                        // Settings API endpoints - public for MVP (auth admin in JWT phase 2)
+                        .requestMatchers("/api/settings/**").permitAll()
+
                         // WebSocket endpoint - public for MVP (S3.3)
                         .requestMatchers("/ws/**").permitAll()
 

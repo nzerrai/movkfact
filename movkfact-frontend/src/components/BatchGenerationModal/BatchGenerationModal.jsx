@@ -18,19 +18,25 @@ import {
   Box,
   Typography,
   Divider,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { useSnackbar } from 'notistack';
 import { submitBatch, getDomainColumnConfig } from '../../services/batchService';
+import { getDatasetsByDomain } from '../../services/domainService';
 import { useBatchJobs } from '../../context/BatchJobsContext';
 
 const DATASET_NAME_REGEX = /^[a-zA-Z0-9_\-\s]+$/;
+const NEW_DATASET_VALUE = '__new__';
 
 /**
  * Modal de génération batch.
- * Permet de sélectionner plusieurs domaines et de configurer
- * un dataset (nom + nombre de lignes) par domaine.
+ * Étape 1 : sélectionner un domaine.
+ * Étape 2 : choisir un dataset existant (pré-remplit le nom) ou saisir un nouveau nom.
  */
 const BatchGenerationModal = ({ open, onClose, domains = [] }) => {
   const { enqueueSnackbar } = useSnackbar();
@@ -38,11 +44,13 @@ const BatchGenerationModal = ({ open, onClose, domains = [] }) => {
 
   // Set of selected domain IDs
   const [selectedDomains, setSelectedDomains] = useState(new Set());
-  // Map domainId → { hasConfigurations, columns }
+  // Map domainId → { hasConfigurations, columns, columnsCount }
   const [domainConfigs, setDomainConfigs] = useState(new Map());
-  // Map domainId → { name: string, count: string }
+  // Map domainId → Dataset[]
+  const [domainDatasets, setDomainDatasets] = useState(new Map());
+  // Map domainId → { selectedDatasetId: string, name: string, count: string }
   const [datasetForms, setDatasetForms] = useState(new Map());
-  // Set of domain IDs currently loading their column config
+  // Set of domain IDs currently loading
   const [loadingDomains, setLoadingDomains] = useState(new Set());
   // Global submit loading
   const [submitting, setSubmitting] = useState(false);
@@ -52,6 +60,7 @@ const BatchGenerationModal = ({ open, onClose, domains = [] }) => {
   const handleClose = useCallback(() => {
     setSelectedDomains(new Set());
     setDomainConfigs(new Map());
+    setDomainDatasets(new Map());
     setDatasetForms(new Map());
     setLoadingDomains(new Set());
     setSubmitting(false);
@@ -76,25 +85,38 @@ const BatchGenerationModal = ({ open, onClose, domains = [] }) => {
     if (!datasetForms.has(id)) {
       setDatasetForms((prev) => {
         const m = new Map(prev);
-        m.set(id, { name: `${domain.name}-batch`, count: '100' });
+        m.set(id, { selectedDatasetId: NEW_DATASET_VALUE, name: `${domain.name}-batch`, count: '100' });
         return m;
       });
     }
 
-    // Load column config if not already loaded
+    // Load column config + existing datasets if not already loaded
     if (!domainConfigs.has(id)) {
       setLoadingDomains((prev) => new Set(prev).add(id));
       try {
-        const config = await getDomainColumnConfig(id);
+        const [config, datasets] = await Promise.all([
+          getDomainColumnConfig(id),
+          getDatasetsByDomain(id),
+        ]);
         setDomainConfigs((prev) => {
           const m = new Map(prev);
           m.set(id, config);
+          return m;
+        });
+        setDomainDatasets((prev) => {
+          const m = new Map(prev);
+          m.set(id, datasets || []);
           return m;
         });
       } catch (_) {
         setDomainConfigs((prev) => {
           const m = new Map(prev);
           m.set(id, { hasConfigurations: false, columns: [] });
+          return m;
+        });
+        setDomainDatasets((prev) => {
+          const m = new Map(prev);
+          m.set(id, []);
           return m;
         });
       } finally {
@@ -106,6 +128,25 @@ const BatchGenerationModal = ({ open, onClose, domains = [] }) => {
       }
     }
   }, [selectedDomains, datasetForms, domainConfigs]);
+
+  const handleDatasetSelect = useCallback((domainId, datasetId) => {
+    setDatasetForms((prev) => {
+      const m = new Map(prev);
+      const current = m.get(domainId) || {};
+      if (datasetId === NEW_DATASET_VALUE) {
+        m.set(domainId, { ...current, selectedDatasetId: NEW_DATASET_VALUE });
+      } else {
+        const datasets = domainDatasets.get(domainId) || [];
+        const ds = datasets.find((d) => String(d.id) === String(datasetId));
+        m.set(domainId, {
+          ...current,
+          selectedDatasetId: datasetId,
+          name: ds ? ds.name : current.name,
+        });
+      }
+      return m;
+    });
+  }, [domainDatasets]);
 
   const handleFormChange = useCallback((domainId, field, value) => {
     setDatasetForms((prev) => {
@@ -146,14 +187,20 @@ const BatchGenerationModal = ({ open, onClose, domains = [] }) => {
       for (const id of selectedDomains) {
         const config = domainConfigs.get(id);
         const form = datasetForms.get(id);
-        const columns = config.columns.map((col) => ({
-          name: col.name,
-          columnType: col.type,
-          format: null,
-          minValue: null,
-          maxValue: null,
-          nullable: false,
-        }));
+        const columns = config.columns.map((col) => {
+          const dto = {
+            name: col.name,
+            columnType: col.type,
+            format: null,
+            minValue: null,
+            maxValue: null,
+            nullable: false,
+          };
+          if (col.additionalConfig) {
+            try { dto.constraints = JSON.parse(col.additionalConfig); } catch (_) {}
+          }
+          return dto;
+        });
         dataSetConfigs.push({
           domainId: id,
           datasetName: form.name.trim(),
@@ -163,7 +210,6 @@ const BatchGenerationModal = ({ open, onClose, domains = [] }) => {
       }
 
       const result = await submitBatch(dataSetConfigs);
-      // jobId from backend is Long (number in JS) — always stringify for WebSocket
       trackJob(String(result.jobId), result.totalDatasets);
       enqueueSnackbar(
         `Batch soumis — ${result.totalDatasets} dataset(s) en cours`,
@@ -182,9 +228,9 @@ const BatchGenerationModal = ({ open, onClose, domains = [] }) => {
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle>
-        <Typography variant="h6">Génération Batch</Typography>
+        Génération Batch
         <Typography variant="body2" color="text.secondary">
-          Sélectionnez les domaines à inclure dans le batch
+          Sélectionnez les domaines puis le dataset à générer
         </Typography>
       </DialogTitle>
 
@@ -206,6 +252,8 @@ const BatchGenerationModal = ({ open, onClose, domains = [] }) => {
             const isLoadingConfig = loadingDomains.has(id);
             const config = domainConfigs.get(id);
             const hasConfig = config?.hasConfigurations === true;
+            const datasets = domainDatasets.get(id) || [];
+            const form = datasetForms.get(id);
             const formError = isSelected ? getFormError(id) : null;
 
             return (
@@ -216,6 +264,7 @@ const BatchGenerationModal = ({ open, onClose, domains = [] }) => {
                   sx={{ flexDirection: 'column', py: 1 }}
                   disableGutters
                 >
+                  {/* ── Ligne domaine ── */}
                   <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                     <ListItemIcon sx={{ minWidth: 40 }}>
                       <Checkbox
@@ -250,29 +299,65 @@ const BatchGenerationModal = ({ open, onClose, domains = [] }) => {
                     )}
                   </Box>
 
+                  {/* ── Formulaire dataset (étape 2) ── */}
                   <Collapse in={isSelected && hasConfig} timeout="auto" unmountOnExit sx={{ width: '100%', pl: 5 }}>
-                    <Box sx={{ display: 'flex', gap: 2, mt: 1, mb: 1 }}>
-                      <TextField
-                        label="Nom du dataset"
-                        size="small"
-                        value={datasetForms.get(id)?.name ?? ''}
-                        onChange={(e) => handleFormChange(id, 'name', e.target.value)}
-                        error={!!formError && formError.startsWith('Nom')}
-                        helperText={formError && formError.startsWith('Nom') ? formError : ''}
-                        inputProps={{ 'data-testid': `dataset-name-${id}` }}
-                        sx={{ flex: 2 }}
-                      />
-                      <TextField
-                        label="Nombre de lignes"
-                        size="small"
-                        type="number"
-                        value={datasetForms.get(id)?.count ?? '100'}
-                        onChange={(e) => handleFormChange(id, 'count', e.target.value)}
-                        error={!!formError && formError.startsWith('Nombre')}
-                        helperText={formError && formError.startsWith('Nombre') ? formError : '1–10 000'}
-                        inputProps={{ min: 1, max: 10000, 'data-testid': `dataset-count-${id}` }}
-                        sx={{ flex: 1 }}
-                      />
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mt: 1, mb: 1 }}>
+
+                      {/* Sélecteur de dataset existant */}
+                      <FormControl fullWidth size="small">
+                        <InputLabel>Dataset</InputLabel>
+                        <Select
+                          value={form?.selectedDatasetId ?? NEW_DATASET_VALUE}
+                          label="Dataset"
+                          onChange={(e) => handleDatasetSelect(id, e.target.value)}
+                        >
+                          {datasets.map((ds) => (
+                            <MenuItem key={ds.id} value={String(ds.id)}>
+                              {ds.name}
+                              {ds.rowCount != null && (
+                                <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+                                  ({ds.rowCount} lignes)
+                                </Typography>
+                              )}
+                            </MenuItem>
+                          ))}
+                          <MenuItem value={NEW_DATASET_VALUE}>
+                            <em>— Nouveau dataset —</em>
+                          </MenuItem>
+                        </Select>
+                      </FormControl>
+
+                      {/* Nom + nombre de lignes */}
+                      <Box sx={{ display: 'flex', gap: 2 }}>
+                        <TextField
+                          label="Nom du dataset"
+                          size="small"
+                          value={form?.name ?? ''}
+                          onChange={(e) => handleFormChange(id, 'name', e.target.value)}
+                          error={!!formError && formError.startsWith('Nom')}
+                          helperText={
+                            formError && formError.startsWith('Nom')
+                              ? formError
+                              : form?.selectedDatasetId !== NEW_DATASET_VALUE
+                                ? 'Le nom sera suffixé automatiquement si déjà utilisé'
+                                : ''
+                          }
+                          inputProps={{ 'data-testid': `dataset-name-${id}` }}
+                          sx={{ flex: 2 }}
+                        />
+                        <TextField
+                          label="Nombre de lignes"
+                          size="small"
+                          type="number"
+                          value={form?.count ?? '100'}
+                          onChange={(e) => handleFormChange(id, 'count', e.target.value)}
+                          error={!!formError && formError.startsWith('Nombre')}
+                          helperText={formError && formError.startsWith('Nombre') ? formError : '1–10 000'}
+                          inputProps={{ min: 1, max: 10000, 'data-testid': `dataset-count-${id}` }}
+                          sx={{ flex: 1 }}
+                        />
+                      </Box>
+
                     </Box>
                   </Collapse>
                 </ListItem>

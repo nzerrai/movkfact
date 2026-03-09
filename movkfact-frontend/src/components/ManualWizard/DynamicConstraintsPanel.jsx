@@ -40,7 +40,7 @@ const DynamicConstraintsPanel = ({ column, onChange }) => {
 
   if (column.type === 'ENUM') {
     const values = constraints.values ?? [];
-    const raw = values.join(', ');
+    const raw = constraints.rawEnumInput ?? values.join(', ');
     return (
       <Box sx={{ mt: 1 }}>
         <TextField
@@ -48,11 +48,18 @@ const DynamicConstraintsPanel = ({ column, onChange }) => {
           size="small"
           value={raw}
           onChange={(e) => {
-            const list = e.target.value.split(',').map(v => v.trimStart()).filter(v => v !== '');
-            handleChange('values', list);
+            // Only update the raw display string — do not parse yet
+            onChange({ ...column, constraints: { ...constraints, rawEnumInput: e.target.value } });
+          }}
+          onBlur={(e) => {
+            // Parse into array on blur
+            const list = e.target.value.split(',').map(v => v.trim()).filter(v => v !== '');
+            onChange({ ...column, constraints: { ...constraints, values: list, rawEnumInput: list.join(', ') } });
           }}
           sx={{ width: 280 }}
           placeholder="Ex: Actif, Inactif, Suspendu"
+          helperText={values.length === 0 ? 'Au moins une valeur requise' : `${values.length} valeur(s)`}
+          error={values.length === 0}
           inputProps={{ 'data-testid': 'constraint-enum-values' }}
         />
       </Box>

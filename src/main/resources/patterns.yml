@@ -14,6 +14,9 @@ LAST_NAME:
   - "(?i)^family_?name$"
   - "(?i)^nom$"
   - "(?i)^surname$"
+  - "(?i)^name$"
+  - "(?i)^nom_?famille$"
+  - "(?i)^nom_?de_?famille$"
 
 EMAIL:
   - "(?i)^email$"
@@ -54,6 +57,18 @@ CITY:
   - "(?i)^town$"
   - "(?i)^municipality$"
 
+INTEGER:
+  - "(?i)^age$"
+  - "(?i)^age_?actuel$"
+  - "(?i)^current_?age$"
+  - "(?i)^age_?courant$"
+  - "(?i)^quantite$"
+  - "(?i)^quantity$"
+  - "(?i)^rang$"
+  - "(?i)^rank$"
+  - "(?i)^score$"
+  - "(?i)^note$"
+
 # FINANCIAL TYPOLOGY (3 types)
 AMOUNT:
   - "(?i)^amount$"
@@ -84,6 +99,8 @@ BIRTH_DATE:
   - "(?i)^birthdate$"
   - "(?i)^birth_?date$"
   - "(?i)^naissance$"
+  - "(?i)^date_?naissance$"
+  - "(?i)^date_?de_?naissance$"
   - "(?i)^date_?of_?birth$"
   - "(?i)^dob$"
 
@@ -108,3 +125,85 @@ TIMEZONE:
   - "(?i)^tz$"
   - "(?i)^timezone_?code$"
   - "(?i)^time_?zone$"
+
+# NUMERIC TYPOLOGY (additional)
+DECIMAL:
+  - "(?i)^decimal$"
+  - "(?i)^float$"
+  - "(?i)^double$"
+  - "(?i)^montant_?decimal$"
+  - "(?i)^prix$"
+
+PERCENTAGE:
+  - "(?i)^percentage$"
+  - "(?i)^pourcentage$"
+  - "(?i)^taux$"
+  - "(?i)^rate$"
+  - "(?i)^pct$"
+
+BOOLEAN:
+  - "(?i)^boolean$"
+  - "(?i)^bool$"
+  - "(?i)^actif$"
+  - "(?i)^active$"
+  - "(?i)^enabled$"
+  - "(?i)^flag$"
+  - "(?i)^boolean_?actif$"
+
+ENUM:
+  - "(?i)^enum$"
+  - "(?i)^statut$"
+  - "(?i)^status$"
+  - "(?i)^categorie$"
+  - "(?i)^category$"
+  - "(?i)^type$"
+  - "(?i)^etat$"
+  - "(?i)^state$"
+
+TEXT:
+  - "(?i)^text$"
+  - "(?i)^texte$"
+  - "(?i)^description$"
+  - "(?i)^comment$"
+  - "(?i)^commentaire$"
+  - "(?i)^note_?text$"
+  - "(?i)^remarks$"
+  - "(?i)^remarques$"
+
+# IDENTIFIER TYPOLOGY
+UUID:
+  - "(?i)^uuid$"
+  - "(?i)^guid$"
+  - "(?i)^identifier$"
+  - "(?i)^identifiant$"
+
+URL:
+  - "(?i)^url$"
+  - "(?i)^website$"
+  - "(?i)^site_?web$"
+  - "(?i)^lien$"
+  - "(?i)^link$"
+  - "(?i)^webpage$"
+
+IP_ADDRESS:
+  - "(?i)^ip_?address$"
+  - "(?i)^ip$"
+  - "(?i)^adresse_?ip$"
+  - "(?i)^ipv4$"
+  - "(?i)^ipv6$"
+
+# GEOGRAPHIC TYPOLOGY (additional)
+COUNTRY:
+  - "(?i)^country$"
+  - "(?i)^pays$"
+  - "(?i)^nation$"
+  - "(?i)^country_?code$"
+  - "(?i)^code_?pays$"
+
+COMPANY:
+  - "(?i)^company$"
+  - "(?i)^entreprise$"
+  - "(?i)^societe$"
+  - "(?i)^organization$"
+  - "(?i)^organisation$"
+  - "(?i)^employeur$"

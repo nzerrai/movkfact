@@ -1,5 +1,6 @@
 package com.movkfact.service.detection;
 
+import com.movkfact.context.DetectionContext;
 import com.movkfact.dto.InferenceResult;
 import com.movkfact.enums.ColumnType;
 import com.movkfact.enums.InferenceLevel;
@@ -14,9 +15,14 @@ import org.springframework.stereotype.Service;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
- * Smart two-level column type inference service (S9.1).
+ * Smart three-level column type inference service (S9.1 + S10.1).
+ *
+ * <p><b>Niveau 0 — Learned (S10.1):</b> Looks up the user-validated corpus via
+ * {@link ColumnLearningService}. If a reliable mapping (count ≥ min-count) exists,
+ * returns LEARNED result immediately.</p>
  *
  * <p><b>Niveau 1 — Name-based:</b> Uses {@link ColumnPatternDetector} to match the column
  * name against a dictionary of known patterns (email, phone, first_name, ...).
@@ -37,6 +43,9 @@ public class ColumnTypeInferenceService {
     private static final double ANALYZER_CONFIDENCE = 80.0;
 
     @Autowired
+    private ColumnLearningService learningService;
+
+    @Autowired
     private ColumnPatternDetector patternDetector;
 
     @Autowired
@@ -51,8 +60,11 @@ public class ColumnTypeInferenceService {
     @Autowired
     private ColumnValueAnalyzer valueAnalyzer;
 
+    @Autowired(required = false) // null hors contexte HTTP (tests, batch)
+    private DetectionContext detectionContext;
+
     /**
-     * Infer the most likely column type using a two-level strategy.
+     * Infer the most likely column type using a three-level strategy.
      *
      * @param columnName   The CSV column header name (may be null)
      * @param sampleValues Up to 100 sample values from the column (may be null or empty)
@@ -60,6 +72,18 @@ public class ColumnTypeInferenceService {
      *         type may be null if detection is inconclusive.
      */
     public InferenceResult infer(String columnName, List<String> sampleValues) {
+
+        // ── Niveau 0 : corpus appris (S10.2 domain-first) ────────────────────────
+        if (columnName != null && !columnName.isBlank()) {
+            String normalized = learningService.normalize(columnName);
+            Long currentDomainId = (detectionContext != null) ? detectionContext.getDomainId() : null;
+            Optional<InferenceResult> learned = learningService.lookup(normalized, currentDomainId);
+            if (learned.isPresent()) {
+                logger.debug("ColumnTypeInferenceService: '{}' → {} (LEARNED, conf={})",
+                        columnName, learned.get().getType(), Math.round(learned.get().getConfidence()));
+                return learned.get();
+            }
+        }
 
         // ── Niveau 1 : nom de colonne ─────────────────────────────────────────────
         if (columnName != null && !columnName.isBlank()) {

@@ -1,5 +1,6 @@
 package com.movkfact.controller;
 
+import com.movkfact.context.DetectionContext;
 import com.movkfact.dto.TypeDetectionResult;
 import com.movkfact.service.detection.CsvTypeDetectionService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,6 +33,9 @@ public class TypeDetectionController {
     
     @Autowired
     private CsvTypeDetectionService detectionService;
+
+    @Autowired
+    private DetectionContext detectionContext;
     
     /**
      * Detect column types from uploaded CSV file.
@@ -57,8 +61,10 @@ public class TypeDetectionController {
     public ResponseEntity<TypeDetectionResult> detectTypes(
             @PathVariable Long domainId,
             @RequestParam(value = "file", required = false) MultipartFile file,
-            @RequestParam(value = "sampleSize", required = false, defaultValue = "100") 
-            @Parameter(description = "Number of rows to sample (1-10000)") Integer sampleSize) {
+            @RequestParam(value = "sampleSize", required = false, defaultValue = "100")
+            @Parameter(description = "Number of rows to sample (1-10000)") Integer sampleSize,
+            @RequestParam(value = "noHeader", required = false, defaultValue = "false")
+            @Parameter(description = "True if the CSV has no header row") boolean noHeader) {
         
         try {
             // Validate file exists and is not empty
@@ -102,8 +108,11 @@ public class TypeDetectionController {
                 sampleSize = 100;
             }
             
+            // Alimenter le contexte de détection avec le domaine courant (S10.2)
+            detectionContext.setDomainId(domainId);
+
             // Call detection service
-            TypeDetectionResult result = detectionService.detectTypes(file, sampleSize);
+            TypeDetectionResult result = detectionService.detectTypes(file, sampleSize, noHeader);
             
             logger.info("TypeDetectionController: Detection successful for domain {} - {} columns detected",
                     domainId, result.getColumns().size());

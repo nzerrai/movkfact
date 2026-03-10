@@ -181,6 +181,7 @@ const DomainsPage = () => {
           type: col.type,
           confidence: col.confidence || 0,
           inferenceLevel: col.inferenceLevel || null,
+          learnedCount: col.learnedCount || 0,
           isPII: col.pii || false,
           piiCategory: col.piiCategory || null,
         };

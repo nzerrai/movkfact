@@ -1,11 +1,11 @@
 import { useState, useRef } from 'react';
-import { Box, Button, Card, Typography } from '@mui/material';
+import { Box, Button, Card, Checkbox, FormControlLabel, Typography } from '@mui/material';
 
 /**
  * S2.5: UploadZone Component
- * Drag & drop CSV file upload interface
+ * Drag & drop CSV file upload interface with optional no-header mode.
  */
-const UploadZone = ({ onFileSelected, onFileDropped }) => {
+const UploadZone = ({ onFileSelected, onFileDropped, noHeader, onNoHeaderChange }) => {
   const [dragActive, setDragActive] = useState(false);
   const fileInput = useRef(null);
 
@@ -19,7 +19,6 @@ const UploadZone = ({ onFileSelected, onFileDropped }) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    
     const files = e.dataTransfer.files;
     if (files && files.length > 0) {
       const file = files[0];
@@ -36,49 +35,64 @@ const UploadZone = ({ onFileSelected, onFileDropped }) => {
   };
 
   return (
-    <Card
-      onDragEnter={handleDrag}
-      onDragLeave={handleDrag}
-      onDragOver={handleDrag}
-      onDrop={handleDrop}
-      sx={{
-        padding: 4,
-        textAlign: 'center',
-        border: '2px dashed',
-        borderColor: dragActive ? 'primary.main' : 'divider',
-        backgroundColor: dragActive ? 'action.hover' : 'background.paper',
-        cursor: 'pointer',
-        transition: 'all 0.3s ease',
-        '&:hover': {
-          borderColor: 'primary.light',
-          backgroundColor: 'action.hover'
-        }
-      }}
-    >
-      <Typography variant="h6" sx={{ mb: 2 }}>
-        📁 CSV Upload & Preview
-      </Typography>
-      <Typography sx={{ mb: 2, color: 'text.secondary' }}>
-        Drag CSV file here or click below
-      </Typography>
-      <Button
-        variant="contained"
-        onClick={() => fileInput.current?.click()}
-        sx={{ mb: 2 }}
+    <Box>
+      <Card
+        onDragEnter={handleDrag}
+        onDragLeave={handleDrag}
+        onDragOver={handleDrag}
+        onDrop={handleDrop}
+        sx={{
+          padding: 4,
+          textAlign: 'center',
+          border: '2px dashed',
+          borderColor: dragActive ? 'primary.main' : 'divider',
+          backgroundColor: dragActive ? 'action.hover' : 'background.paper',
+          cursor: 'pointer',
+          transition: 'all 0.3s ease',
+          '&:hover': { borderColor: 'primary.light', backgroundColor: 'action.hover' }
+        }}
       >
-        📂 Select File
-      </Button>
-      <input
-        ref={fileInput}
-        type="file"
-        accept=".csv"
-        hidden
-        onChange={handleChange}
-      />
-      <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary' }}>
-        CSV files only • Maximum 10 MB
-      </Typography>
-    </Card>
+        <Typography variant="h6" sx={{ mb: 2 }}>
+          📁 CSV Upload & Preview
+        </Typography>
+        <Typography sx={{ mb: 2, color: 'text.secondary' }}>
+          Drag CSV file here or click below
+        </Typography>
+        <Button
+          variant="contained"
+          onClick={() => fileInput.current?.click()}
+          sx={{ mb: 2 }}
+        >
+          📂 Select File
+        </Button>
+        <input
+          ref={fileInput}
+          type="file"
+          accept=".csv"
+          hidden
+          onChange={handleChange}
+        />
+        <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary' }}>
+          CSV files only • Maximum 10 MB
+        </Typography>
+        <Box sx={{ mt: 2 }} onClick={(e) => e.stopPropagation()}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={!!noHeader}
+                onChange={(e) => onNoHeaderChange(e.target.checked)}
+                size="small"
+              />
+            }
+            label={
+              <Typography variant="body2" color="text.secondary">
+                Ce fichier n'a pas de ligne d'entête
+              </Typography>
+            }
+          />
+        </Box>
+      </Card>
+    </Box>
   );
 };
 

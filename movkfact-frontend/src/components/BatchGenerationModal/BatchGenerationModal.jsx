@@ -141,7 +141,7 @@ const BatchGenerationModal = ({ open, onClose, domains = [] }) => {
         m.set(domainId, {
           ...current,
           selectedDatasetId: datasetId,
-          name: ds ? ds.name : current.name,
+          name: ds ? ds.datasetName : current.name,
         });
       }
       return m;
@@ -313,7 +313,7 @@ const BatchGenerationModal = ({ open, onClose, domains = [] }) => {
                         >
                           {datasets.map((ds) => (
                             <MenuItem key={ds.id} value={String(ds.id)}>
-                              {ds.name}
+                              {ds.datasetName}
                               {ds.rowCount != null && (
                                 <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
                                   ({ds.rowCount} lignes)

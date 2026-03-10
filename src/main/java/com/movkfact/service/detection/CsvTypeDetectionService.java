@@ -57,42 +57,81 @@ public class CsvTypeDetectionService {
      * @param sampleSize Number of rows to analyze (default: 100)
      * @return TypeDetectionResult with detected columns and metadata
      */
-    public TypeDetectionResult detectTypes(MultipartFile csvFile, Integer sampleSize) {
-        logger.info("CsvTypeDetectionService: Starting detection for file: {}", 
-                csvFile.getOriginalFilename());
-        
+    public TypeDetectionResult detectTypes(MultipartFile csvFile, Integer sampleSize, boolean noHeader) {
+        logger.info("CsvTypeDetectionService: Starting detection for file: {} (noHeader={})",
+                csvFile.getOriginalFilename(), noHeader);
+
         if (sampleSize == null || sampleSize <= 0) {
             sampleSize = DEFAULT_SAMPLE_SIZE;
         }
-        
+
         try {
             // Validate file size
             if (csvFile.getSize() > maxFileSize) {
-                logger.error("File size {} exceeds maximum allowed {}", 
+                logger.error("File size {} exceeds maximum allowed {}",
                         csvFile.getSize(), maxFileSize);
                 throw new IllegalArgumentException("File size exceeds maximum allowed size (10MB)");
             }
-            
+
             // Read CSV content with charset detection
             byte[] fileContent = csvFile.getBytes();
             String csvContent = new String(fileContent, detectCharset(fileContent));
-            
+
             // Parse CSV
             List<DetectedColumn> detectedColumns = new ArrayList<>();
-            
+
+            if (noHeader) {
+                // No-header mode: parse as arrays, generate col_1, col_2, … names
+                try (CSVParser csvParser = CSVFormat.DEFAULT.parse(new StringReader(csvContent))) {
+                    List<CSVRecord> records = csvParser.getRecords();
+                    if (records.isEmpty()) throw new IllegalArgumentException("CSV file is empty");
+                    int colCount = records.get(0).size();
+                    List<String> headers = new ArrayList<>();
+                    for (int i = 1; i <= colCount; i++) headers.add("col_" + i);
+                    logger.info("CsvTypeDetectionService: No-header mode — {} columns", colCount);
+
+                    Map<String, List<String>> columnValues = new HashMap<>();
+                    for (String h : headers) columnValues.put(h, new ArrayList<>());
+
+                    int rowCount = 0;
+                    for (CSVRecord record : records) {
+                        if (rowCount >= sampleSize) break;
+                        for (int i = 0; i < headers.size(); i++) {
+                            columnValues.get(headers.get(i)).add(record.get(i));
+                        }
+                        rowCount++;
+                    }
+
+                    for (String header : headers) {
+                        List<String> columnData = columnValues.get(header);
+                        InferenceResult inference = inferenceService.infer(header, columnData);
+                        PiiResult pii = piiDetectionService.detect(header, columnData);
+                        DetectedColumn detected = new DetectedColumn(
+                                header, inference.getType(), inference.getConfidence(),
+                                new ArrayList<>(),
+                                inference.getType() != null ? Arrays.asList(header) : new ArrayList<>()
+                        );
+                        detected.setInferenceLevel(inference.getLevel());
+                        detected.setLearnedCount(inference.getLearnedCount());
+                        detected.setPII(pii.isPii());
+                        detected.setPiiCategory(pii.getCategory());
+                        detectedColumns.add(detected);
+                    }
+                }
+            } else {
             try (CSVParser csvParser = CSVFormat.DEFAULT.withFirstRecordAsHeader()
                     .parse(new StringReader(csvContent))) {
-                
+
                 // Get headers
                 List<String> headers = new ArrayList<>(csvParser.getHeaderMap().keySet());
                 logger.info("CsvTypeDetectionService: Found {} columns", headers.size());
-                
+
                 // Get sample values for each column
                 Map<String, List<String>> columnValues = new HashMap<>();
                 for (String header : headers) {
                     columnValues.put(header, new ArrayList<>());
                 }
-                
+
                 // Collect sample values
                 int rowCount = 0;
                 for (CSVRecord record : csvParser) {
@@ -105,7 +144,7 @@ public class CsvTypeDetectionService {
                     }
                     rowCount++;
                 }
-                
+
                 // Detect type for each column using ColumnTypeInferenceService (S9.1)
                 for (String header : headers) {
                     List<String> columnData = columnValues.get(header);
@@ -121,6 +160,7 @@ public class CsvTypeDetectionService {
                             inference.getType() != null ? Arrays.asList(header) : new ArrayList<>()
                     );
                     detected.setInferenceLevel(inference.getLevel());
+                    detected.setLearnedCount(inference.getLearnedCount());
                     detected.setPII(pii.isPii());
                     detected.setPiiCategory(pii.getCategory());
                     detectedColumns.add(detected);
@@ -133,6 +173,7 @@ public class CsvTypeDetectionService {
                         logger.debug("CsvTypeDetectionService: Column '{}' → UNKNOWN", header);
                     }
                 }
+            }
             }
             
             TypeDetectionResult result = new TypeDetectionResult(

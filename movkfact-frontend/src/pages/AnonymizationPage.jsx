@@ -76,9 +76,10 @@ export default function AnonymizationPage() {
       fd.append('file', file);
       fd.append('format', format);
       const res = await axios.post('/api/anonymize/inspect', fd);
+      const detectedTypes = res.data.detectedTypes || {};
       const cols = res.data.columns.map(col => ({
         columnName: col,
-        columnType: guessType(col),
+        columnType: detectedTypes[col] || guessType(col),
         anonymize: true,
       }));
       setColumns(cols);

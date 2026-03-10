@@ -1,6 +1,7 @@
 package com.movkfact.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.movkfact.context.DetectionContext;
 import com.movkfact.dto.TypeDetectionResult;
 import com.movkfact.dto.DetectedColumn;
 import com.movkfact.service.detection.CsvTypeDetectionService;
@@ -9,11 +10,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.nio.charset.StandardCharsets;
 
+import static org.mockito.Mockito.*;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -30,6 +33,9 @@ public class TypeDetectionControllerTests {
 
     @Autowired(required = false)
     private CsvTypeDetectionService detectionService;
+
+    @MockBean
+    private DetectionContext detectionContext;
 
     private MockMultipartFile createMockCsv(String content) {
         return new MockMultipartFile(
@@ -177,5 +183,21 @@ public class TypeDetectionControllerTests {
     public void detectTypes_missing_file_returns_400() throws Exception {
         mockMvc.perform(multipart("/api/domains/1/detect-types"))
                 .andExpect(status().isBadRequest());
+    }
+
+    // ── AC5-bis (S10.2) : controller alimente DetectionContext avant detectTypes ──
+
+    @Test
+    public void detectTypes_setsDomainIdOnContextBeforeDetection() throws Exception {
+        // AC5-bis : vérifier que detectionContext.setDomainId(7L) est appelé
+        // avant detectionService.detectTypes() pour domainId=7
+        String csvContent = "col1,col2\nval1,val2\n";
+        MockMultipartFile file = createMockCsv(csvContent);
+
+        mockMvc.perform(multipart("/api/domains/7/detect-types").file(file))
+                .andExpect(status().isOk());
+
+        // AC5-bis : setDomainId(7L) doit avoir été appelé sur le contexte
+        verify(detectionContext).setDomainId(7L);
     }
 }

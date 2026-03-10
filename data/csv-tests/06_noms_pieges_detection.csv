@@ -1,0 +1,11 @@
+valeur,libelle,identifiant,reference,montant_total,contact,naissance,utilisateur,statut,quantite
+1250.50,Facture client,USR-00123,REF-2024-001,1500.00,jean.martin@example.fr,1990-05-15,jmartin,actif,3
+890.00,Bon commande,USR-00456,REF-2024-002,950.00,marie.dupont@gmail.com,1985-11-22,mdupont,inactif,7
+3400.75,Devis pro,USR-00789,REF-2024-003,3600.00,pierre.b@outlook.com,1992-03-08,pbernard,actif,2
+560.25,Avoir,USR-00321,REF-2024-004,600.00,sophie.l@yahoo.fr,1978-07-30,slefevre,suspendu,5
+7800.00,Remboursement,USR-00654,REF-2024-005,8000.00,thomas.r@free.fr,2000-12-01,trousseau,actif,1
+230.80,Acompte,USR-00987,REF-2024-006,250.00,camille.g@laposte.net,1995-04-17,cgarnier,inactif,8
+4500.00,Solde,USR-00111,REF-2024-007,4800.00,luc.simon@sfr.fr,1988-09-03,lsimon,actif,4
+1100.60,Commission,USR-00222,REF-2024-008,1200.00,julie.f@orange.fr,1973-01-25,jfontaine,actif,6
+670.90,Frais,USR-00333,REF-2024-009,700.00,marc.c@hotmail.com,2003-06-14,mchevalier,suspendu,9
+2200.00,Prestation,USR-00444,REF-2024-010,2400.00,isabelle.m@wanadoo.fr,1967-10-09,imorel,actif,2

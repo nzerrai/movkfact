@@ -1,0 +1,6 @@
+#FileLock
+#Mon Mar 09 18:36:24 CET 2026
+hostName=debian
+id=19cd3abe7921b8ac0b9dc45fbb7b65ce8ee941ed015
+method=file
+server=127.0.1.1\:36079

@@ -3,9 +3,12 @@ package com.movkfact.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.movkfact.dto.AnonymizationColumnConfig;
+import com.movkfact.dto.DetectedColumn;
+import com.movkfact.dto.TypeDetectionResult;
 import com.movkfact.entity.DataSet;
 import com.movkfact.repository.DataSetRepository;
 import com.movkfact.service.AnonymizationService;
+import com.movkfact.service.detection.CsvTypeDetectionService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,8 +16,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Endpoints d'anonymisation RGPD.
@@ -30,28 +35,50 @@ public class AnonymizationController {
 
     private final AnonymizationService service;
     private final DataSetRepository dataSetRepository;
+    private final CsvTypeDetectionService detectionService;
     private final ObjectMapper mapper = new ObjectMapper();
 
-    public AnonymizationController(AnonymizationService service, DataSetRepository dataSetRepository) {
+    public AnonymizationController(AnonymizationService service,
+                                   DataSetRepository dataSetRepository,
+                                   CsvTypeDetectionService detectionService) {
         this.service = service;
         this.dataSetRepository = dataSetRepository;
+        this.detectionService = detectionService;
     }
 
     /**
-     * Détecte les colonnes du fichier uploadé.
-     * Lit uniquement les en-têtes — aucun contenu de données n'est conservé.
+     * Détecte les colonnes du fichier uploadé avec leurs types RGPD.
+     * Pour CSV : utilise le pipeline de détection complet (patterns + data-based).
+     * Pour JSON : retourne uniquement les noms de colonnes (inspection des en-têtes).
      */
     @PostMapping("/inspect")
     public ResponseEntity<Map<String, Object>> inspect(
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "format", defaultValue = "csv") String format) throws IOException {
 
-        List<String> columns = service.inspectColumns(file, format);
-        return ResponseEntity.ok(Map.of(
-            "columns", columns,
-            "format", format,
-            "filename", file.getOriginalFilename()
-        ));
+        Map<String, String> detectedTypes = new HashMap<>();
+        List<String> columns;
+
+        if ("json".equalsIgnoreCase(format)) {
+            columns = service.inspectColumns(file, format);
+        } else {
+            TypeDetectionResult detection = detectionService.detectTypes(file, 100);
+            columns = detection.getColumns().stream()
+                    .map(DetectedColumn::getColumnName)
+                    .collect(Collectors.toList());
+            detection.getColumns().forEach(col -> {
+                if (col.getDetectedType() != null) {
+                    detectedTypes.put(col.getColumnName(), col.getDetectedType().name());
+                }
+            });
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("columns", columns);
+        response.put("detectedTypes", detectedTypes);
+        response.put("format", format);
+        response.put("filename", file.getOriginalFilename());
+        return ResponseEntity.ok(response);
     }
 
     /**

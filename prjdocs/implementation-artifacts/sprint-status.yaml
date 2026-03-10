@@ -78,6 +78,7 @@ development_status:
 
   # ── EPIC 10 — Quality Gate ──────────────────────────────
   epic-10: backlog
+  10-1-adaptive-learning-detection: done  # S10.1 — Apprentissage adaptatif (code-review passé)
   10-1-docker-documentation: backlog
   epic-10-retrospective: optional
 

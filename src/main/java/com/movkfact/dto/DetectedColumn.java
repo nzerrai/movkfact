@@ -19,6 +19,7 @@ public class DetectedColumn {
     private InferenceLevel inferenceLevel; // S9.1
     private boolean isPII;                 // S9.2
     private PiiCategory piiCategory;       // S9.2
+    private int learnedCount;              // S10.1: nombre de validations corpus
 
     public DetectedColumn(String columnName, ColumnType detectedType, Double confidence) {
         this.columnName = columnName;
@@ -57,4 +58,7 @@ public class DetectedColumn {
 
     public PiiCategory getPiiCategory() { return piiCategory; }
     public void setPiiCategory(PiiCategory piiCategory) { this.piiCategory = piiCategory; }
+
+    public int getLearnedCount() { return learnedCount; }
+    public void setLearnedCount(int learnedCount) { this.learnedCount = learnedCount; }
 }

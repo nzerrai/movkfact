@@ -205,8 +205,10 @@ public class AnonymizationService {
     // ─── Moteur d'anonymisation ───────────────────────────────────────────────────
 
     String anonymizeValue(String value, String columnType) {
+        if (columnType == null) return value == null ? "" : value;
+        // GENDER doit toujours produire une valeur de genre valide (RGPD)
+        if ("GENDER".equals(columnType)) return generateGender(value);
         if (value == null || value.isBlank()) return "";
-        if (columnType == null) return value;
 
         switch (columnType) {
             case "FIRST_NAME":      return pick(FIRST_NAMES);
@@ -214,7 +216,6 @@ public class AnonymizationService {
             case "EMAIL":           return generateEmail();
             case "PHONE":           return generatePhone();
             case "ADDRESS":         return generateAddress();
-            case "GENDER":          return value; // non-identifiant direct
             case "BIRTH_DATE":      return anonymizeBirthDate(value);
             case "DATE":            return anonymizeDate(value);
             case "TIME":            return generateTime();
@@ -382,6 +383,22 @@ public class AnonymizationService {
             } catch (DateTimeParseException ignored) {}
         }
         return value;
+    }
+
+    /**
+     * Genre aléatoire dans le même format que la valeur originale.
+     * Garantit une valeur non vide même si l'original est null/blank (RGPD).
+     */
+    private String generateGender(String value) {
+        String v = value == null ? "" : value.trim();
+        if (v.equalsIgnoreCase("homme") || v.equalsIgnoreCase("femme"))
+            return RANDOM.nextBoolean() ? "Homme" : "Femme";
+        if (v.equalsIgnoreCase("male") || v.equalsIgnoreCase("female"))
+            return RANDOM.nextBoolean() ? "Male" : "Female";
+        if (v.equalsIgnoreCase("h") || v.equals("F") && v.length() == 1)
+            return RANDOM.nextBoolean() ? "H" : "F";
+        // Format M/F (défaut) — couvre aussi les valeurs vides ou inconnues
+        return RANDOM.nextBoolean() ? "M" : "F";
     }
 
     private <T> T pick(List<T> list) {

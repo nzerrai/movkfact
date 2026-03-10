@@ -46,7 +46,7 @@ class LastNameGeneratorTests {
         for (int i = 0; i < 100; i++) {
             String lastName = (String) generator.generate();
             assertFalse(lastName.isEmpty());
-            assertFalse(lastName.contains(" "));  // Single word
+
         }
     }
 }

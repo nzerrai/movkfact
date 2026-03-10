@@ -71,7 +71,8 @@ public class ColumnValueAnalyzer {
         
         // For dates: check column name to distinguish DATE vs BIRTH_DATE
         if (dateScore > 0) {
-            if (columnName.toLowerCase().contains("birth")) {
+            String col = columnName == null ? "" : columnName.toLowerCase();
+            if (col.contains("birth") || col.contains("naiss") || col.contains("dob")) {
                 scores.put(ColumnType.BIRTH_DATE, dateScore);
             } else {
                 scores.put(ColumnType.DATE, dateScore);

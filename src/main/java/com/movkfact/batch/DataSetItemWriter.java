@@ -40,13 +40,13 @@ public class DataSetItemWriter implements ItemWriter<DataSet> {
      * otherwise appends "_2", "_3", … until a free slot is found.
      */
     private String resolveUniqueName(Long domainId, String baseName) {
-        if (!dataSetRepository.existsByDomainIdAndNameAndDeletedAtIsNull(domainId, baseName)) {
+        if (!dataSetRepository.existsByDomainIdAndDatasetNameAndDeletedAtIsNull(domainId, baseName)) {
             return baseName;
         }
         int counter = 2;
         while (true) {
             String candidate = baseName + "_" + counter;
-            if (!dataSetRepository.existsByDomainIdAndNameAndDeletedAtIsNull(domainId, candidate)) {
+            if (!dataSetRepository.existsByDomainIdAndDatasetNameAndDeletedAtIsNull(domainId, candidate)) {
                 return candidate;
             }
             counter++;

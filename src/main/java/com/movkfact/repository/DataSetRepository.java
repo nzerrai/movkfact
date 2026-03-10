@@ -3,7 +3,6 @@ package com.movkfact.repository;
 import com.movkfact.entity.DataSet;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
@@ -41,13 +40,9 @@ public interface DataSetRepository extends JpaRepository<DataSet, Long> {
     
     /**
      * Check if a dataset with the given name exists for a domain and is not soft-deleted.
-     * 
-     * @param domainId The domain ID
-     * @param name The dataset name
-     * @return true if dataset exists and not deleted, false otherwise
+     * Uses Spring Data derived query on the Java field name {@code datasetName}.
      */
-    @Query(value = "SELECT CASE WHEN EXISTS (SELECT 1 FROM datasets d WHERE d.domain_id = :domainId AND d.dataset_name = :name AND d.deleted_at IS NULL) THEN true ELSE false END", nativeQuery = true)
-    boolean existsByDomainIdAndNameAndDeletedAtIsNull(@Param("domainId") Long domainId, @Param("name") String name);
+    boolean existsByDomainIdAndDatasetNameAndDeletedAtIsNull(Long domainId, String datasetName);
     
     /**
      * Count all datasets that are not soft-deleted.

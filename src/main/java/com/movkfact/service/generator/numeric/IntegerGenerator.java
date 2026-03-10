@@ -22,16 +22,16 @@ public class IntegerGenerator extends DataTypeGenerator {
         int min = 0;
         int max = 1000;
 
+        if (columnConfig.getMinValue() != null) min = columnConfig.getMinValue();
+        if (columnConfig.getMaxValue() != null) max = columnConfig.getMaxValue();
+
         Map<String, Object> constraints = columnConfig.getConstraints();
         if (constraints != null) {
-            if (constraints.get("min") != null) {
-                min = ((Number) constraints.get("min")).intValue();
-            }
-            if (constraints.get("max") != null) {
-                max = ((Number) constraints.get("max")).intValue();
-            }
+            if (constraints.get("min") != null) min = ((Number) constraints.get("min")).intValue();
+            if (constraints.get("max") != null) max = ((Number) constraints.get("max")).intValue();
         }
 
+        if (max < min) max = min;
         return min + random.nextInt(max - min + 1);
     }
 }

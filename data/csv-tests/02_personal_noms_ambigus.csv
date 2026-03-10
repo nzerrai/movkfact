@@ -1,0 +1,11 @@
+name,prenom,mail,tel,sexe,adresse,ville,cp
+Martin,Jean,jean.martin@example.fr,0612345678,Homme,12 rue de la Paix,Paris,75001
+Dupont,Marie,marie.dupont@gmail.com,0698765432,Femme,5 avenue des Fleurs,Lyon,69001
+Bernard,Pierre,pierre.b@outlook.com,0601020304,Homme,8 boulevard Victor Hugo,Marseille,13001
+Lefevre,Sophie,sophie.l@yahoo.fr,0677889900,Femme,3 impasse du Moulin,Bordeaux,33000
+Rousseau,Thomas,thomas.r@free.fr,0611223344,Homme,21 chemin des Vignes,Toulouse,31000
+Garnier,Camille,camille.g@laposte.net,0655443322,Femme,7 place de la Republique,Nantes,44000
+Simon,Luc,luc.simon@sfr.fr,0699887766,Homme,14 rue du Commerce,Strasbourg,67000
+Fontaine,Julie,julie.f@orange.fr,0633221100,Femme,2 allee des Roses,Montpellier,34000
+Chevalier,Marc,marc.c@hotmail.com,0644556677,Homme,9 rue Nationale,Rennes,35000
+Morel,Isabelle,isabelle.m@wanadoo.fr,0622334455,Femme,6 avenue de la Gare,Lille,59000

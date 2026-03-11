@@ -62,7 +62,7 @@ public class AnonymizationController {
         if ("json".equalsIgnoreCase(format)) {
             columns = service.inspectColumns(file, format);
         } else {
-            TypeDetectionResult detection = detectionService.detectTypes(file, 100);
+            TypeDetectionResult detection = detectionService.detectTypes(file, 100, false);
             columns = detection.getColumns().stream()
                     .map(DetectedColumn::getColumnName)
                     .collect(Collectors.toList());

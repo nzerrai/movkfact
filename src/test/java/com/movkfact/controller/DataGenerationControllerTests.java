@@ -544,5 +544,95 @@ class DataGenerationControllerTests {
         .then()
             .statusCode(404);
     }
+
+    // ============================================================================
+    // Extra Columns Tests (Epic 12)
+    // ============================================================================
+
+    @Test
+    void testPOST_CreateDataset_WithExtraColumns_Success() {
+        GenerationRequestDTO request = new GenerationRequestDTO();
+        request.setNumberOfRows(10);
+        request.setDatasetName("Test_With_Extra_Columns");
+        
+        // Add detected columns
+        List<ColumnConfigDTO> columns = new ArrayList<>();
+        columns.add(new ColumnConfigDTO("firstname", ColumnType.FIRST_NAME));
+        columns.add(new ColumnConfigDTO("email", ColumnType.EMAIL));
+        request.setColumns(columns);
+        
+        // Add extra columns
+        List<ColumnConfigDTO> extraColumns = new ArrayList<>();
+        ColumnConfigDTO extraCol = new ColumnConfigDTO("status", ColumnType.ENUM);
+        extraColumns.add(extraCol);
+        request.setExtraColumns(extraColumns);
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(request)
+        .when()
+            .post("/api/domains/{domainId}/data-sets", testDomainId)
+        .then()
+            .statusCode(201)
+            .body("data.name", equalTo("Test_With_Extra_Columns"))
+            .body("data.rowCount", equalTo(10));
+    }
+
+    @Test
+    void testPOST_CreateDataset_ExceedMaxColumns_Returns400() {
+        GenerationRequestDTO request = new GenerationRequestDTO();
+        request.setNumberOfRows(10);
+        request.setDatasetName("Test_Too_Many_Columns");
+        
+        // Add detected columns to reach near max (assuming max is 50)
+        List<ColumnConfigDTO> columns = new ArrayList<>();
+        for (int i = 0; i < 45; i++) {
+            columns.add(new ColumnConfigDTO("col_" + i, ColumnType.TEXT));
+        }
+        request.setColumns(columns);
+        
+        // Add extra columns that will exceed the limit
+        List<ColumnConfigDTO> extraColumns = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            extraColumns.add(new ColumnConfigDTO("extra_col_" + i, ColumnType.TEXT));
+        }
+        request.setExtraColumns(extraColumns);
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(request)
+        .when()
+            .post("/api/domains/{domainId}/data-sets", testDomainId)
+        .then()
+            .statusCode(400)
+            .body("error", containsString("column"))
+            .body("error", containsString("exceed|maximum|limit"));
+    }
+
+    @Test
+    void testPOST_CreateDataset_WithDuplicateExtraColumn_Returns400() {
+        GenerationRequestDTO request = new GenerationRequestDTO();
+        request.setNumberOfRows(10);
+        request.setDatasetName("Test_Duplicate_Extra_Column");
+        
+        // Add detected columns
+        List<ColumnConfigDTO> columns = new ArrayList<>();
+        columns.add(new ColumnConfigDTO("firstname", ColumnType.FIRST_NAME));
+        request.setColumns(columns);
+        
+        // Add extra column with same name as detected column
+        List<ColumnConfigDTO> extraColumns = new ArrayList<>();
+        extraColumns.add(new ColumnConfigDTO("firstname", ColumnType.ENUM));
+        request.setExtraColumns(extraColumns);
+
+        given()
+            .contentType(ContentType.JSON)
+            .body(request)
+        .when()
+            .post("/api/domains/{domainId}/data-sets", testDomainId)
+        .then()
+            .statusCode(400)
+            .body("error", containsString("duplicate|already exists|conflict"));
+    }
 }
 

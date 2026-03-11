@@ -82,7 +82,7 @@ public class AccuracyMeasurementRealDataTests {
         for (File csvFile : easyFiles) {
             try {
                 MultipartFile multipartFile = createMultipartFile(csvFile);
-                TypeDetectionResult result = detectionService.detectTypes(multipartFile, 100);
+                TypeDetectionResult result = detectionService.detectTypes(multipartFile, 100, false);
                 AccuracyResult accuracy = calculateAccuracyForResult(csvFile, result);
                 
                 results.add(accuracy);
@@ -126,7 +126,7 @@ public class AccuracyMeasurementRealDataTests {
         for (File csvFile : mediumFiles) {
             try {
                 MultipartFile multipartFile = createMultipartFile(csvFile);
-                TypeDetectionResult result = detectionService.detectTypes(multipartFile, 100);
+                TypeDetectionResult result = detectionService.detectTypes(multipartFile, 100, false);
                 AccuracyResult accuracy = calculateAccuracyForResult(csvFile, result);
                 
                 results.add(accuracy);
@@ -170,7 +170,7 @@ public class AccuracyMeasurementRealDataTests {
         for (File csvFile : hardFiles) {
             try {
                 MultipartFile multipartFile = createMultipartFile(csvFile);
-                TypeDetectionResult result = detectionService.detectTypes(multipartFile, 100);
+                TypeDetectionResult result = detectionService.detectTypes(multipartFile, 100, false);
                 AccuracyResult accuracy = calculateAccuracyForResult(csvFile, result);
                 
                 results.add(accuracy);
@@ -213,7 +213,7 @@ public class AccuracyMeasurementRealDataTests {
         for (File csvFile : robustFiles) {
             try {
                 MultipartFile multipartFile = createMultipartFile(csvFile);
-                TypeDetectionResult result = detectionService.detectTypes(multipartFile, 100);
+                TypeDetectionResult result = detectionService.detectTypes(multipartFile, 100, false);
                 AccuracyResult accuracy = calculateAccuracyForResult(csvFile, result);
                 
                 results.add(accuracy);
@@ -258,7 +258,7 @@ public class AccuracyMeasurementRealDataTests {
         for (File csvFile : allCsvFiles) {
             try {
                 MultipartFile multipartFile = createMultipartFile(csvFile);
-                TypeDetectionResult result = detectionService.detectTypes(multipartFile, 100);
+                TypeDetectionResult result = detectionService.detectTypes(multipartFile, 100, false);
                 AccuracyResult accuracy = calculateAccuracyForResult(csvFile, result);
                 totalAccuracy += accuracy.accuracyPercent;
                 successCount++;

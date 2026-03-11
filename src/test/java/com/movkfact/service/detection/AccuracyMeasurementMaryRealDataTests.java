@@ -53,7 +53,7 @@ public class AccuracyMeasurementMaryRealDataTests {
         assertTrue(csvFile.exists(), "Customer database not found: " + csvFile.getAbsolutePath());
         
         MultipartFile multipartFile = createMultipartFile(csvFile);
-        TypeDetectionResult result = detectionService.detectTypes(multipartFile, 100);
+        TypeDetectionResult result = detectionService.detectTypes(multipartFile, 100, false);
         
         assertNotNull(result, "Detection result should not be null");
         assertNotNull(result.getColumns(), "Columns should be detected");
@@ -86,7 +86,7 @@ public class AccuracyMeasurementMaryRealDataTests {
         assertTrue(csvFile.exists(), "Transactions file not found: " + csvFile.getAbsolutePath());
         
         MultipartFile multipartFile = createMultipartFile(csvFile);
-        TypeDetectionResult result = detectionService.detectTypes(multipartFile, 100);
+        TypeDetectionResult result = detectionService.detectTypes(multipartFile, 100, false);
         
         assertNotNull(result, "Detection result should not be null");
         double accuracy = calculateAccuracyForDataset(csvFile.getName(), result);
@@ -117,7 +117,7 @@ public class AccuracyMeasurementMaryRealDataTests {
         assertTrue(csvFile.exists(), "Temporal file not found: " + csvFile.getAbsolutePath());
         
         MultipartFile multipartFile = createMultipartFile(csvFile);
-        TypeDetectionResult result = detectionService.detectTypes(multipartFile, 100);
+        TypeDetectionResult result = detectionService.detectTypes(multipartFile, 100, false);
         
         assertNotNull(result, "Detection result should not be null");
         double accuracy = calculateAccuracyForDataset(csvFile.getName(), result);
@@ -149,7 +149,7 @@ public class AccuracyMeasurementMaryRealDataTests {
         assertTrue(csvFile.exists(), "Employee file not found: " + csvFile.getAbsolutePath());
         
         MultipartFile multipartFile = createMultipartFile(csvFile);
-        TypeDetectionResult result = detectionService.detectTypes(multipartFile, 100);
+        TypeDetectionResult result = detectionService.detectTypes(multipartFile, 100, false);
         
         assertNotNull(result, "Detection result should not be null");
         double accuracy = calculateAccuracyForDataset(csvFile.getName(), result);
@@ -190,7 +190,7 @@ public class AccuracyMeasurementMaryRealDataTests {
         for (File csvFile : csvFiles) {
             try {
                 MultipartFile multipartFile = createMultipartFile(csvFile);
-                TypeDetectionResult result = detectionService.detectTypes(multipartFile, 100);
+                TypeDetectionResult result = detectionService.detectTypes(multipartFile, 100, false);
                 double accuracy = calculateAccuracyForDataset(csvFile.getName(), result);
                 
                 totalAccuracy += accuracy;

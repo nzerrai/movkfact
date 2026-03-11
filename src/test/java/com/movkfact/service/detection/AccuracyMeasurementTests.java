@@ -82,7 +82,7 @@ public class AccuracyMeasurementTests {
         MultipartFile csvFile = createMockCsvFile(csvContent, "easy-test.csv");
         
         // Run detection
-        TypeDetectionResult detected = detectionService.detectTypes(csvFile, 5);
+        TypeDetectionResult detected = detectionService.detectTypes(csvFile, 5, false);
         
         // Setup expected types (truth values)
         List<ExpectedColumnType> expectedResults = new ArrayList<>();
@@ -130,7 +130,7 @@ public class AccuracyMeasurementTests {
         MultipartFile csvFile = createMockCsvFile(csvContent, "medium-test.csv");
         
         // Run detection
-        TypeDetectionResult detected = detectionService.detectTypes(csvFile, 5);
+        TypeDetectionResult detected = detectionService.detectTypes(csvFile, 5, false);
         
         // Setup expected with alternatives
         List<ExpectedColumnType> expectedResults = new ArrayList<>();
@@ -187,7 +187,7 @@ public class AccuracyMeasurementTests {
         MultipartFile csvFile = createMockCsvFile(csvContent, "hard-test.csv");
         
         // Run detection
-        TypeDetectionResult detected = detectionService.detectTypes(csvFile, 5);
+        TypeDetectionResult detected = detectionService.detectTypes(csvFile, 5, false);
         
         // Setup expected with loose criteria
         List<ExpectedColumnType> expectedResults = new ArrayList<>();
@@ -272,7 +272,7 @@ public class AccuracyMeasurementTests {
         MultipartFile csvFile = createMockCsvFile(csvContent, "robustness-test.csv");
         
         // Run detection
-        TypeDetectionResult detected = detectionService.detectTypes(csvFile, 100);
+        TypeDetectionResult detected = detectionService.detectTypes(csvFile, 100, false);
         
         // Setup expected
         List<ExpectedColumnType> expectedResults = new ArrayList<>();

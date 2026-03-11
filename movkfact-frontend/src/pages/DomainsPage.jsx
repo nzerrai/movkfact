@@ -47,6 +47,7 @@ const DomainsPage = () => {
   const [uploadedData, setUploadedData] = useState(null);
   const [csvData, setCsvData] = useState([]);
   const [detectedTypes, setDetectedTypes] = useState({});
+  const [extraColumns, setExtraColumns] = useState([]);
   const [showConfigurationStep, setShowConfigurationStep] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [showDatasetModal, setShowDatasetModal] = useState(false);
@@ -166,11 +167,14 @@ const DomainsPage = () => {
 
   // Handle proceeding from CSV upload (after configuration)
   const handleProceedToConfiguration = useCallback((data) => {
-    // Extract csvData and detectionResults from the payload
-    const { csvData: rawCsv, detectionResults } = data;
+    // Extract csvData, detectionResults, and extraColumns from the payload
+    const { csvData: rawCsv, detectionResults, extraColumns: newExtraColumns } = data;
     
     // Store the raw CSV data
     setCsvData(rawCsv || []);
+    
+    // Store the extra columns added by the user
+    setExtraColumns(newExtraColumns || []);
     
     // Convert detectionResults array to detectedTypes object
     // S9.1: preserve confidence and inferenceLevel for ConfigurationPanel
@@ -396,6 +400,7 @@ const DomainsPage = () => {
           setUploadedData(null);
           setCsvData([]);
           setDetectedTypes({});
+          setExtraColumns([]);
         }}
         maxWidth="lg"
         fullWidth
@@ -408,6 +413,7 @@ const DomainsPage = () => {
               <ConfigurationPanel
                 csvData={csvData}
                 detectedTypes={detectedTypes}
+                extraColumns={extraColumns}
                 domainId={selectedDomainId}
                 onGenerationComplete={handleGenerationComplete}
               />

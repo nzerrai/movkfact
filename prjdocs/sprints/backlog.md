@@ -33,6 +33,16 @@ Backlog complet pour le projet movkfact, refletant l'etat reel au 06/03/2026 apr
 
 ---
 
+## EPIC 12 — CSV Upload Enhancements
+
+**Objectif :** Améliorations de l'upload CSV avec ajout de colonnes personnalisées.
+**Sprint :** 1 | **Statut :** In Progress
+
+- S12.1 : Backend support pour ajout de colonne lors upload CSV
+- S12.2 : Frontend interface pour ajout de colonne
+
+---
+
 ## EPIC 1 — Foundation & Core MVP
 
 **Objectif :** Infrastructure backend/frontend, gestion CRUD des domaines.

@@ -38,6 +38,7 @@ import ResultViewer from './ResultViewer';
 const ConfigurationPanel = ({ 
   csvData, 
   detectedTypes, 
+  extraColumns,
   domainId, 
   onGenerationComplete,
   CsvContext 
@@ -253,7 +254,8 @@ const ConfigurationPanel = ({
       const payload = {
         datasetName: datasetName,
         numberOfRows: rowCount,
-        columns: columns
+        columns: columns,
+        extraColumns: extraColumns || []
       };
 
       // Call S2.3 API: POST /api/domains/{domainId}/data-sets

@@ -59,7 +59,7 @@ public class CsvTypeDetectionServiceTests {
         String csvContent = createCsvContent(headers, rows);
         MultipartFile csvFile = createMockCsv(csvContent);
 
-        TypeDetectionResult result = detectionService.detectTypes(csvFile, 100);
+        TypeDetectionResult result = detectionService.detectTypes(csvFile, 100, false);
 
         assertThat(result).isNotNull();
         assertThat(result.getColumns()).hasSize(3);
@@ -78,7 +78,7 @@ public class CsvTypeDetectionServiceTests {
         String csvContent = createCsvContent(headers, rows);
         MultipartFile csvFile = createMockCsv(csvContent);
 
-        TypeDetectionResult result = detectionService.detectTypes(csvFile, 100);
+        TypeDetectionResult result = detectionService.detectTypes(csvFile, 100, false);
 
         assertThat(result).isNotNull();
         assertThat(result.getColumns()).hasSize(3);
@@ -94,7 +94,7 @@ public class CsvTypeDetectionServiceTests {
         String csvContent = createCsvContent(headers, rows);
         MultipartFile csvFile = createMockCsv(csvContent);
 
-        TypeDetectionResult result = detectionService.detectTypes(csvFile, 100);
+        TypeDetectionResult result = detectionService.detectTypes(csvFile, 100, false);
 
         assertThat(result).isNotNull();
         assertThat(result.getColumns()).hasSize(3);
@@ -110,7 +110,7 @@ public class CsvTypeDetectionServiceTests {
         String csvContent = createCsvContent(headers, rows);
         MultipartFile csvFile = createMockCsv(csvContent);
 
-        TypeDetectionResult result = detectionService.detectTypes(csvFile, 100);
+        TypeDetectionResult result = detectionService.detectTypes(csvFile, 100, false);
 
         assertThat(result.getColumns()).hasSize(6);
         // At least some columns should be detected with high confidence
@@ -131,7 +131,7 @@ public class CsvTypeDetectionServiceTests {
         String csvContent = createCsvContent(headers, rows);
         MultipartFile csvFile = createMockCsv(csvContent);
 
-        TypeDetectionResult result = detectionService.detectTypes(csvFile, 100);
+        TypeDetectionResult result = detectionService.detectTypes(csvFile, 100, false);
 
         // Should handle nulls/empty gracefully
         assertThat(result.getColumns()).hasSize(2);
@@ -148,7 +148,7 @@ public class CsvTypeDetectionServiceTests {
         String csvContent = createCsvContent(headers, rows);
         MultipartFile csvFile = createMockCsv(csvContent);
 
-        TypeDetectionResult result = detectionService.detectTypes(csvFile, 100);
+        TypeDetectionResult result = detectionService.detectTypes(csvFile, 100, false);
 
         // Calculate accuracy: correct detections / total columns
         long correctDetections = result.getColumns().stream()
@@ -165,7 +165,7 @@ public class CsvTypeDetectionServiceTests {
         String csvContent = createCsvContent(new String[]{"email"}, rows);
         MultipartFile csvFile = createMockCsv(csvContent);
 
-        TypeDetectionResult result = detectionService.detectTypes(csvFile, 100);
+        TypeDetectionResult result = detectionService.detectTypes(csvFile, 100, false);
 
         assertThat(result.getDetectionMethod()).isEqualTo("pattern_based");
     }
@@ -181,7 +181,7 @@ public class CsvTypeDetectionServiceTests {
         MultipartFile csvFile = createMockCsv(csvContent);
 
         // Sample size of 5 - should only analyze first 5 rows
-        TypeDetectionResult result = detectionService.detectTypes(csvFile, 5);
+        TypeDetectionResult result = detectionService.detectTypes(csvFile, 5, false);
 
         assertThat(result).isNotNull();
         assertThat(result.getColumns()).hasSize(1);
@@ -199,7 +199,7 @@ public class CsvTypeDetectionServiceTests {
         MultipartFile csvFile = createMockCsv(csv.toString());
 
         long start = System.currentTimeMillis();
-        TypeDetectionResult result = detectionService.detectTypes(csvFile, 100);
+        TypeDetectionResult result = detectionService.detectTypes(csvFile, 100, false);
         long duration = System.currentTimeMillis() - start;
 
         assertThat(duration)

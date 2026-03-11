@@ -86,3 +86,9 @@ development_status:
   epic-11: done
   11-1-anonymisation-rgpd: done
   epic-11-retrospective: optional
+
+  # ── EPIC 12 — CSV Upload Enhancements ───────────────────
+  epic-12: in-progress
+  12-1-backend-csv-column-addition: ready-for-dev
+  12-2-frontend-csv-column-addition: ready-for-dev
+  epic-12-retrospective: optional

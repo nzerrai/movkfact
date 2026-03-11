@@ -1,6 +1,7 @@
 package com.movkfact.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.movkfact.dto.ColumnConfigDTO;
 import com.movkfact.dto.DataSetDTO;
 import com.movkfact.dto.GenerationRequestDTO;
 import com.movkfact.dto.GenerationResponseDTO;
@@ -17,6 +18,7 @@ import com.movkfact.entity.Activity;
 import com.movkfact.dto.DataSetSummaryDTO;
 import com.movkfact.service.ActivityService;
 import com.movkfact.service.ColumnConfigurationService;
+import com.movkfact.service.ConfigurationService;
 import com.movkfact.service.DataGeneratorService;
 import com.movkfact.service.DomainService;
 import org.springframework.context.ApplicationEventPublisher;
@@ -38,6 +40,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * REST Controller for Data Generation operations.
@@ -54,8 +58,13 @@ import java.util.stream.Collectors;
 @Tag(name = "Data Generation", description = "APIs for generating and managing datasets")
 public class DataGenerationController {
     
+    private static final Logger logger = LoggerFactory.getLogger(DataGenerationController.class);
+    
     @Autowired
     private DataGeneratorService dataGeneratorService;
+    
+    @Autowired
+    private ConfigurationService configurationService;
     
     @Autowired
     private DataSetRepository dataSetRepository;
@@ -128,7 +137,7 @@ public class DataGenerationController {
         String datasetName = request.getDatasetName();
         
         // Check if dataset name already exists for this domain
-        if (dataSetRepository.existsByDomainIdAndNameAndDeletedAtIsNull(domainId, datasetName)) {
+        if (dataSetRepository.existsByDomainIdAndDatasetNameAndDeletedAtIsNull(domainId, datasetName)) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new ApiErrorResponse("Dataset with this name already exists in this domain", 409, "/api/domains/" + domainId + "/data-sets"));
         }
@@ -136,6 +145,27 @@ public class DataGenerationController {
         // Set domain ID in request
         request.setDomainId(domainId);
         request.setDatasetName(datasetName); // Update request for service
+        
+        // Merge extra columns if provided
+        if (request.getExtraColumns() != null && !request.getExtraColumns().isEmpty()) {
+            logger.debug("Processing {} extra columns for domain {}", request.getExtraColumns().size(), domainId);
+            try {
+                List<ColumnConfigDTO> allColumns = columnConfigurationService.addExtraColumns(request.getColumns(), request.getExtraColumns());
+                request.setColumns(allColumns);
+                logger.debug("Successfully merged extra columns. Total columns: {}", allColumns.size());
+            } catch (IllegalArgumentException e) {
+                logger.warn("Duplicate column validation failed: {}", e.getMessage());
+                throw e;
+            }
+        }
+        
+        // Validate column count against configuration limit
+        Integer maxColumns = configurationService.getConfigurationAsInteger("max_columns_per_dataset", 50);
+        if (request.getColumns().size() > maxColumns) {
+            String errorMsg = "Maximum " + maxColumns + " columns allowed per dataset. Got " + request.getColumns().size();
+            logger.warn("Column limit exceeded: {}", errorMsg);
+            throw new IllegalArgumentException(errorMsg);
+        }
         
         // Generate data using DataGeneratorService
         GenerationResponseDTO response = dataGeneratorService.generate(request);
@@ -160,6 +190,16 @@ public class DataGenerationController {
         
         // Persist to database
         DataSet saved = dataSetRepository.save(dataset);
+        
+        // Log extra columns for audit trail
+        if (request.getExtraColumns() != null && !request.getExtraColumns().isEmpty()) {
+            logger.info("Dataset {} generated with {} extra columns: {}", 
+                saved.getId(), 
+                request.getExtraColumns().size(),
+                request.getExtraColumns().stream()
+                    .map(ColumnConfigDTO::getName)
+                    .collect(Collectors.joining(", ")));
+        }
 
         // Sync column configurations so batch generation can reuse this domain's schema.
         // additionalConfig stores constraints as JSON (e.g. ENUM values).
@@ -253,7 +293,7 @@ public class DataGenerationController {
         }
         
         // Check if name exists
-        boolean exists = dataSetRepository.existsByDomainIdAndNameAndDeletedAtIsNull(domainId, name);
+        boolean exists = dataSetRepository.existsByDomainIdAndDatasetNameAndDeletedAtIsNull(domainId, name);
         
         Map<String, Object> result = Map.of(
             "name", name,

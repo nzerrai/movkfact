@@ -90,7 +90,7 @@ public class PerformanceTestsPhaseB {
         MultipartFile csvFile = createMockCsvFile(csvContent, "test-10-rows.csv");
         
         // Warm up
-        detectionService.detectTypes(csvFile, 10);
+        detectionService.detectTypes(csvFile, 10, false);
         
         // Actual benchmark (multiple runs for average)
         long totalTime = 0;
@@ -100,7 +100,7 @@ public class PerformanceTestsPhaseB {
             csvFile = createMockCsvFile(csvContent, "test-10-rows.csv");
             long startTime = System.nanoTime();
             
-            TypeDetectionResult result = detectionService.detectTypes(csvFile, 10);
+            TypeDetectionResult result = detectionService.detectTypes(csvFile, 10, false);
             
             long endTime = System.nanoTime();
             long elapsedMs = (endTime - startTime) / 1_000_000;
@@ -130,7 +130,7 @@ public class PerformanceTestsPhaseB {
         MultipartFile csvFile = createMockCsvFile(csvContent, "test-1k-rows.csv");
         
         // Warm up
-        detectionService.detectTypes(csvFile, 1000);
+        detectionService.detectTypes(csvFile, 1000, false);
         
         // Actual benchmark
         long totalTime = 0;
@@ -140,7 +140,7 @@ public class PerformanceTestsPhaseB {
             csvFile = createMockCsvFile(csvContent, "test-1k-rows.csv");
             long startTime = System.nanoTime();
             
-            TypeDetectionResult result = detectionService.detectTypes(csvFile, 1000);
+            TypeDetectionResult result = detectionService.detectTypes(csvFile, 1000, false);
             
             long endTime = System.nanoTime();
             long elapsedMs = (endTime - startTime) / 1_000_000;
@@ -170,7 +170,7 @@ public class PerformanceTestsPhaseB {
         MultipartFile csvFile = createMockCsvFile(csvContent, "test-10k-rows.csv");
         
         // Warm up
-        detectionService.detectTypes(csvFile, 10000);
+        detectionService.detectTypes(csvFile, 10000, false);
         
         // Actual benchmark
         long totalTime = 0;
@@ -180,7 +180,7 @@ public class PerformanceTestsPhaseB {
             csvFile = createMockCsvFile(csvContent, "test-10k-rows.csv");
             long startTime = System.nanoTime();
             
-            TypeDetectionResult result = detectionService.detectTypes(csvFile, 10000);
+            TypeDetectionResult result = detectionService.detectTypes(csvFile, 10000, false);
             
             long endTime = System.nanoTime();
             long elapsedMs = (endTime - startTime) / 1_000_000;
@@ -214,7 +214,7 @@ public class PerformanceTestsPhaseB {
         // Single run (no warm up for extreme case)
         long startTime = System.nanoTime();
         
-        TypeDetectionResult result = detectionService.detectTypes(csvFile, 50000);
+        TypeDetectionResult result = detectionService.detectTypes(csvFile, 50000, false);
         
         long endTime = System.nanoTime();
         long elapsedMs = (endTime - startTime) / 1_000_000;

@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import {
   Alert, AlertTitle, Box, Button, Card, CardContent,
-  Chip, CircularProgress, LinearProgress,
-  Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography
+  Chip, CircularProgress, LinearProgress, IconButton,
+  Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography, Tooltip
 } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import Papa from 'papaparse';
 import UploadZone from './UploadZone';
 import PreviewTable from './PreviewTable';
 import TypeDetectionResults from './TypeDetectionResults';
 import UploadedDatasetsList from './UploadedDatasetsList';
+import AddColumnModal from './AddColumnModal';
 
 /**
  * Nom proposé par défaut selon le type détecté.
@@ -56,8 +58,10 @@ const CsvUploadPanel = ({ domainId, onProceedToConfiguration, onCancel }) => {
   const [error, setError] = useState(null);
   const [step, setStep] = useState('upload'); // upload | review | naming | confirmed
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [noHeader, setNoHeader] = useState(false);
+  const [extraColumns, setExtraColumns] = useState([]);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [columnNames, setColumnNames] = useState({});
+  const [noHeader, setNoHeader] = useState(false);
 
   const handleFileSelected = (selectedFile) => handleFile(selectedFile);
   const handleFileDropped = (droppedFile) => handleFile(droppedFile);
@@ -145,6 +149,15 @@ const CsvUploadPanel = ({ domainId, onProceedToConfiguration, onCancel }) => {
 
   const handleTypeOverride = (columnName, newType) => {
     setTypeOverrides((prev) => ({ ...prev, [columnName]: newType }));
+  };
+
+  const handleAddColumn = (newColumn) => {
+    setExtraColumns((prev) => [...prev, newColumn]);
+    setShowAddModal(false);
+  };
+
+  const handleRemoveExtraColumn = (columnName) => {
+    setExtraColumns((prev) => prev.filter((col) => col.name !== columnName));
   };
 
   const handleConfirm = () => {
@@ -298,6 +311,11 @@ const CsvUploadPanel = ({ domainId, onProceedToConfiguration, onCancel }) => {
   if (step === 'confirmed') {
     const successRate =
       detectionResults.filter((r) => r.confidence > 60).length / detectionResults.length;
+    const existingColumnNames = [
+      ...detectionResults.map((r) => r.name),
+      ...extraColumns.map((c) => c.name),
+    ];
+
     return (
       <Box>
         <Alert severity="success" sx={{ mb: 2 }}>
@@ -310,13 +328,13 @@ const CsvUploadPanel = ({ domainId, onProceedToConfiguration, onCancel }) => {
             <Box sx={{ mb: 2 }}>
               <Typography variant="body2"><strong>File:</strong> {file?.name}</Typography>
               <Typography variant="body2"><strong>Rows:</strong> {csvData.length}</Typography>
-              <Typography variant="body2"><strong>Columns:</strong> {detectionResults.length}</Typography>
+              <Typography variant="body2"><strong>Columns:</strong> {detectionResults.length + extraColumns.length}</Typography>
               <Typography variant="body2">
                 <strong>Detection Success Rate:</strong> {Math.round(successRate * 100)}%
               </Typography>
             </Box>
             <Typography variant="subtitle2" sx={{ mb: 1 }}>Detected Columns:</Typography>
-            <Table size="small">
+            <Table size="small" sx={{ mb: 3 }}>
               <TableHead>
                 <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
                   <TableCell><strong>Column</strong></TableCell>
@@ -334,8 +352,75 @@ const CsvUploadPanel = ({ domainId, onProceedToConfiguration, onCancel }) => {
                 ))}
               </TableBody>
             </Table>
+
+            {/* Extra Columns Display */}
+            {extraColumns.length > 0 && (
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="subtitle2" sx={{ mb: 1 }}>Extra Columns Added:</Typography>
+                <Table size="small" sx={{ mb: 2 }}>
+                  <TableHead>
+                    <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
+                      <TableCell><strong>Column</strong></TableCell>
+                      <TableCell><strong>Type</strong></TableCell>
+                      <TableCell><strong>Constraints</strong></TableCell>
+                      <TableCell align="center"><strong>Action</strong></TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {extraColumns.map((col) => (
+                      <TableRow key={col.name}>
+                        <TableCell>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            {col.name}
+                            <Chip label="Ajoutée" size="small" variant="outlined" color="success" />
+                          </Box>
+                        </TableCell>
+                        <TableCell>{col.columnType}</TableCell>
+                        <TableCell>
+                          {col.constraints ? (
+                            <Typography variant="caption" component="div">
+                              {Object.entries(col.constraints)
+                                .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`)
+                                .join(' | ')}
+                            </Typography>
+                          ) : (
+                            '—'
+                          )}
+                        </TableCell>
+                        <TableCell align="center">
+                          <Tooltip title="Delete column">
+                            <IconButton
+                              size="small"
+                              onClick={() => handleRemoveExtraColumn(col.name)}
+                              color="error"
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Box>
+            )}
           </CardContent>
         </Card>
+
+        <Button 
+          variant="outlined" 
+          onClick={() => setShowAddModal(true)} 
+          sx={{ mb: 2 }}
+          disabled={extraColumns.length >= 10} // Max 10 extra columns
+        >
+          + Ajouter colonne
+        </Button>
+        {extraColumns.length >= 10 && (
+          <Alert severity="warning" sx={{ mb: 2 }}>
+            Maximum of 10 extra columns reached
+          </Alert>
+        )}
+
         <Box sx={{ display: 'flex', gap: 1, justifyContent: 'space-between', mb: 3 }}>
           <Button variant="outlined" onClick={() => setStep(noHeader ? 'naming' : 'review')}>
             ← Back to Review
@@ -345,7 +430,7 @@ const CsvUploadPanel = ({ domainId, onProceedToConfiguration, onCancel }) => {
             color="success"
             onClick={() => {
               if (onProceedToConfiguration) {
-                onProceedToConfiguration({ csvData, detectionResults });
+                onProceedToConfiguration({ csvData, detectionResults, extraColumns });
               }
               setRefreshTrigger((prev) => prev + 1);
             }}
@@ -362,6 +447,13 @@ const CsvUploadPanel = ({ domainId, onProceedToConfiguration, onCancel }) => {
             showActions
           />
         )}
+
+        <AddColumnModal
+          open={showAddModal}
+          onAdd={handleAddColumn}
+          onClose={() => setShowAddModal(false)}
+          existingNames={existingColumnNames}
+        />
       </Box>
     );
   }

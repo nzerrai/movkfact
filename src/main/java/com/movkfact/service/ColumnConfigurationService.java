@@ -1,5 +1,6 @@
 package com.movkfact.service;
 
+import com.movkfact.dto.ColumnConfigDTO;
 import com.movkfact.entity.ColumnConfig;
 import com.movkfact.entity.ColumnConfiguration;
 import com.movkfact.entity.DataSet;
@@ -17,6 +18,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * Service for managing column configurations.
@@ -154,5 +158,48 @@ public class ColumnConfigurationService {
     public void deleteColumnConfigurations(Long domainId) {
         logger.info("Deleting column configurations for domain {}", domainId);
         columnConfigurationRepository.deleteByDomainId(domainId);
+    }
+
+    /**
+     * Merge extra columns with detected columns, validating uniqueness.
+     * @throws IllegalArgumentException if duplicate column names are found
+     */
+    public List<ColumnConfigDTO> addExtraColumns(List<ColumnConfigDTO> detectedColumns, List<ColumnConfigDTO> extraColumns) {
+        if (extraColumns == null || extraColumns.isEmpty()) {
+            return detectedColumns;
+        }
+
+        // Validate uniqueness - check against detected columns
+        Set<String> names = detectedColumns.stream()
+                .map(ColumnConfigDTO::getName)
+                .collect(Collectors.toSet());
+
+        // Collect detected column names for error message
+        List<String> duplicates = new ArrayList<>();
+        
+        for (ColumnConfigDTO extra : extraColumns) {
+            if (names.contains(extra.getName())) {
+                duplicates.add(extra.getName());
+            }
+            names.add(extra.getName());
+        }
+        
+        // Validate duplicates among extra columns themselves
+        Set<String> extraNames = new HashSet<>();
+        for (ColumnConfigDTO extra : extraColumns) {
+            if (!extraNames.add(extra.getName())) {
+                duplicates.add(extra.getName());
+            }
+        }
+        
+        if (!duplicates.isEmpty()) {
+            String errorMsg = "Duplicate column name(s) found: " + String.join(", ", duplicates);
+            logger.error("Column validation error: {}", errorMsg);
+            throw new IllegalArgumentException(errorMsg);
+        }
+
+        List<ColumnConfigDTO> all = new ArrayList<>(detectedColumns);
+        all.addAll(extraColumns);
+        return all;
     }
 }

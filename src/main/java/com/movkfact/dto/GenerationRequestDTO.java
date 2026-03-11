@@ -26,6 +26,8 @@ public class GenerationRequestDTO {
     @NotNull(message = "Columns must not be null")
     @NotEmpty(message = "At least one column must be provided")
     private List<ColumnConfigDTO> columns;
+    
+    private List<ColumnConfigDTO> extraColumns;
 
     // Constructeurs
     public GenerationRequestDTO() {
@@ -67,5 +69,13 @@ public class GenerationRequestDTO {
 
     public void setColumns(List<ColumnConfigDTO> columns) {
         this.columns = columns;
+    }
+
+    public List<ColumnConfigDTO> getExtraColumns() {
+        return extraColumns;
+    }
+
+    public void setExtraColumns(List<ColumnConfigDTO> extraColumns) {
+        this.extraColumns = extraColumns;
     }
 }
